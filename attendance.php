@@ -66,7 +66,9 @@ $attendance_result = $conn->query($attendance_query);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Track gym member attendance - Check-in and check-out">
+    <meta name="theme-color" content="#667eea">
     <title>Attendance - Gym System</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -88,7 +90,7 @@ $attendance_result = $conn->query($attendance_query);
     <div class="container mt-4">
         <div class="row">
             <!-- Check-in Form -->
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="card">
                     <div class="card-header">⏰ Member Check-in</div>
                     <div class="card-body">
@@ -164,7 +166,7 @@ $attendance_result = $conn->query($attendance_query);
             </div>
 
             <!-- Today's Attendance List -->
-            <div class="col-8">
+            <div class="col-12 col-8">
                 <div class="card">
                     <div class="card-header success">
                         📋 Today's Attendance (<?php echo date('F d, Y'); ?>)
