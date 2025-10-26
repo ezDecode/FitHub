@@ -1,0 +1,438 @@
+{
+  "project": {
+    "name": "FitHub Gym Management System",
+    "version": "1.0.0",
+    "description": "A comprehensive web-based gym management system to handle member registrations, membership plans, attendance tracking, trainer management, payment processing, and administrative operations.",
+    "tech_stack": {
+      "frontend": ["HTML5", "CSS3", "JavaScript (ES6+)", "Chart.js", "SweetAlert2", "Flatpickr", "Font Awesome"],
+      "backend": ["PHP 7.4+", "MySQL 8.0+", "PDO"],
+      "server": "Apache/Nginx with PHP support"
+    }
+  },
+  "design_system": {
+    "colors": {
+      "primary": "#FF6B35",
+      "secondary": "#004E89",
+      "accent": "#F7931E",
+      "success": "#2ECC71",
+      "warning": "#F39C12",
+      "danger": "#E74C3C",
+      "dark": "#1A1A2E",
+      "light_gray": "#F5F5F5",
+      "medium_gray": "#95A5A6",
+      "white": "#FFFFFF"
+    },
+    "typography": {
+      "font_family": "Inter Tight",
+      "weights": [300, 400, 500, 600, 700],
+      "headings": 700,
+      "body": 400,
+      "buttons": 600
+    },
+    "spacing": {
+      "base_unit": "8px",
+      "border_radius": {
+        "cards": "8px",
+        "inputs": "4px",
+        "buttons": "24px"
+      }
+    },
+    "breakpoints": {
+      "mobile": "320px - 767px",
+      "tablet": "768px - 1023px",
+      "desktop": "1024px+"
+    }
+  },
+  "user_roles": {
+    "admin": {
+      "permissions": [
+        "full_system_access",
+        "manage_members",
+        "manage_trainers",
+        "manage_plans",
+        "manage_payments",
+        "view_analytics",
+        "system_configuration"
+      ]
+    },
+    "trainer": {
+      "permissions": [
+        "view_assigned_members",
+        "mark_attendance",
+        "update_workout_plans",
+        "view_schedule"
+      ]
+    },
+    "member": {
+      "permissions": [
+        "view_membership_status",
+        "check_attendance_history",
+        "make_payments",
+        "view_workout_plans",
+        "update_profile"
+      ]
+    }
+  },
+  "database_schema": {
+    "tables": {
+      "users": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "email": {"type": "VARCHAR(255)", "unique": true},
+        "password": {"type": "VARCHAR(255)", "hashed": true},
+        "role": {"type": "ENUM", "values": ["admin", "trainer", "member"]},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "members": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "user_id": {"type": "INT", "foreign_key": "users.id"},
+        "full_name": {"type": "VARCHAR(255)"},
+        "phone": {"type": "VARCHAR(20)"},
+        "date_of_birth": {"type": "DATE"},
+        "gender": {"type": "ENUM", "values": ["male", "female", "other"]},
+        "address": {"type": "TEXT"},
+        "emergency_contact": {"type": "VARCHAR(255)"},
+        "emergency_phone": {"type": "VARCHAR(20)"},
+        "photo": {"type": "VARCHAR(255)", "nullable": true},
+        "joined_date": {"type": "DATE"},
+        "status": {"type": "ENUM", "values": ["active", "inactive", "suspended"]}
+      },
+      "trainers": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "user_id": {"type": "INT", "foreign_key": "users.id"},
+        "full_name": {"type": "VARCHAR(255)"},
+        "phone": {"type": "VARCHAR(20)"},
+        "specialization": {"type": "VARCHAR(255)"},
+        "experience_years": {"type": "INT"},
+        "photo": {"type": "VARCHAR(255)", "nullable": true},
+        "hourly_rate": {"type": "DECIMAL(10,2)"},
+        "status": {"type": "ENUM", "values": ["active", "inactive"]}
+      },
+      "membership_plans": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "plan_name": {"type": "VARCHAR(100)"},
+        "duration_months": {"type": "INT"},
+        "price": {"type": "DECIMAL(10,2)"},
+        "description": {"type": "TEXT"},
+        "features": {"type": "JSON"},
+        "status": {"type": "ENUM", "values": ["active", "inactive"]}
+      },
+      "memberships": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "member_id": {"type": "INT", "foreign_key": "members.id"},
+        "plan_id": {"type": "INT", "foreign_key": "membership_plans.id"},
+        "start_date": {"type": "DATE"},
+        "end_date": {"type": "DATE"},
+        "status": {"type": "ENUM", "values": ["active", "expired", "cancelled"]},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "payments": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "membership_id": {"type": "INT", "foreign_key": "memberships.id"},
+        "amount": {"type": "DECIMAL(10,2)"},
+        "payment_date": {"type": "DATE"},
+        "payment_method": {"type": "ENUM", "values": ["cash", "card", "upi", "online"]},
+        "transaction_id": {"type": "VARCHAR(100)", "nullable": true},
+        "status": {"type": "ENUM", "values": ["completed", "pending", "failed"]},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "attendance": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "member_id": {"type": "INT", "foreign_key": "members.id"},
+        "check_in_time": {"type": "DATETIME"},
+        "check_out_time": {"type": "DATETIME", "nullable": true},
+        "date": {"type": "DATE"},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "workout_plans": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "member_id": {"type": "INT", "foreign_key": "members.id"},
+        "trainer_id": {"type": "INT", "foreign_key": "trainers.id"},
+        "plan_details": {"type": "JSON"},
+        "start_date": {"type": "DATE"},
+        "end_date": {"type": "DATE"},
+        "notes": {"type": "TEXT", "nullable": true},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "trainer_assignments": {
+        "id": {"type": "INT", "primary_key": true, "auto_increment": true},
+        "member_id": {"type": "INT", "foreign_key": "members.id"},
+        "trainer_id": {"type": "INT", "foreign_key": "trainers.id"},
+        "assigned_date": {"type": "DATE"},
+        "status": {"type": "ENUM", "values": ["active", "completed"]}
+      }
+    }
+  },
+  "core_modules": {
+    "authentication": {
+      "login_page": {
+        "fields": ["email", "password"],
+        "features": ["remember_me", "password_visibility", "forgot_password"]
+      },
+      "registration": {
+        "type": "admin_created_only",
+        "no_public_signup": true
+      }
+    },
+    "dashboards": {
+      "admin": {
+        "kpi_cards": ["total_members", "active_members", "todays_attendance", "monthly_revenue"],
+        "charts": ["revenue_chart_6months", "payment_methods_pie"],
+        "tables": ["recent_payments", "membership_expiry_alerts"],
+        "quick_actions": ["add_member", "add_payment", "check_attendance"]
+      },
+      "trainer": {
+        "metrics": ["assigned_members_count", "todays_schedule"],
+        "tables": ["recent_attendance", "assigned_members"],
+        "quick_access": ["workout_plans", "attendance_marking"]
+      },
+      "member": {
+        "cards": ["membership_status", "assigned_trainer"],
+        "calendar": ["attendance_calendar"],
+        "tables": ["payment_history", "current_workout_plan"]
+      }
+    },
+    "member_management": {
+      "list_page": {
+        "search": ["name", "phone", "email"],
+        "filters": ["status"],
+        "sorting": ["all_columns"],
+        "pagination": 20,
+        "actions": ["view", "edit", "delete"]
+      },
+      "add_edit_form": {
+        "sections": ["personal_details", "contact_info", "emergency_contact"],
+        "photo_upload": {"max_size": "2MB", "types": ["jpg", "png"]},
+        "validation": ["required_fields", "phone_format", "email_format"]
+      }
+    },
+    "membership_plans": {
+      "list_view": "grid_cards",
+      "plan_details": ["name", "duration", "price", "features"],
+      "status_toggle": true,
+      "features_system": "dynamic_add_remove"
+    },
+    "attendance_tracking": {
+      "check_in_system": {
+        "search": ["name", "phone", "id"],
+        "display": ["photo", "details"],
+        "actions": ["check_in", "check_out"],
+        "timestamp_recording": true
+      },
+      "reports": {
+        "filters": ["date_range", "member_wise"],
+        "exports": ["CSV"],
+        "views": ["monthly", "weekly"]
+      }
+    },
+    "payment_management": {
+      "payment_recording": {
+        "linked_to_membership": true,
+        "methods": ["cash", "card", "upi", "online"],
+        "transaction_tracking": true
+      },
+      "receipt_generation": {
+        "format": "PDF",
+        "includes": ["gym_logo", "member_details", "payment_details", "receipt_number"],
+        "numbering": "REC-YYYYMMDD-XXX"
+      }
+    },
+    "workout_plans": {
+      "creation": {
+        "json_structure": {
+          "day": "Monday-Sunday",
+          "exercise_name": "string",
+          "sets": "number",
+          "reps": "number",
+          "rest_time": "string",
+          "notes": "string"
+        }
+      },
+      "viewing": {
+        "day_wise_breakdown": true,
+        "progress_tracking": "checkboxes",
+        "trainer_notes": true
+      }
+    }
+  },
+  "file_structure": {
+    "frontend": {
+      "css": [
+        "style.css",
+        "dashboard.css",
+        "forms.css",
+        "responsive.css"
+      ],
+      "js": [
+        "main.js",
+        "validation.js",
+        "charts.js",
+        "ajax.js"
+      ],
+      "pages": {
+        "root": ["index.php"],
+        "admin": [
+          "dashboard.php",
+          "members.php",
+          "member-add.php",
+          "member-edit.php",
+          "member-view.php",
+          "plans.php",
+          "trainers.php",
+          "payments.php",
+          "attendance.php",
+          "reports.php"
+        ],
+        "trainer": [
+          "dashboard.php",
+          "assigned-members.php",
+          "workout-plans.php",
+          "attendance.php"
+        ],
+        "member": [
+          "dashboard.php",
+          "profile.php",
+          "attendance.php",
+          "payments.php",
+          "workout-plan.php"
+        ]
+      }
+    },
+    "backend": {
+      "config": [
+        "database.php",
+        "config.php"
+      ],
+      "includes": [
+        "functions.php",
+        "session.php",
+        "auth.php"
+      ],
+      "api": [
+        "login.php",
+        "logout.php",
+        "members-api.php",
+        "plans-api.php",
+        "payments-api.php",
+        "attendance-api.php",
+        "trainers-api.php",
+        "workout-plans-api.php"
+      ],
+      "uploads": [
+        "members/",
+        "trainers/"
+      ]
+    }
+  },
+  "security_requirements": {
+    "password_hashing": "password_hash() with bcrypt",
+    "sql_injection_prevention": "Prepared statements (PDO/MySQLi)",
+    "xss_prevention": "htmlspecialchars() on all outputs",
+    "csrf_protection": "CSRF tokens for forms",
+    "session_timeout": "30 minutes",
+    "access_control": "Role-based on all pages",
+    "file_upload_validation": "Type and size validation"
+  },
+  "validation_rules": {
+    "email": "Valid format, unique",
+    "phone": "10 digits, numeric",
+    "password": "Min 8 characters, 1 uppercase, 1 number",
+    "dates": "Valid format, logical ranges",
+    "amounts": "Positive numbers, max 2 decimals",
+    "file_uploads": "Max 2MB, jpg/png/jpeg only"
+  },
+  "external_libraries": {
+    "required": [
+      "Chart.js v3+",
+      "DataTables or custom pagination",
+      "Flatpickr",
+      "SweetAlert2",
+      "Font Awesome",
+      "jsPDF"
+    ],
+    "optional": [
+      "Axios",
+      "Select2"
+    ]
+  },
+  "development_phases": {
+    "phase_1": {
+      "name": "Foundation & Core Setup",
+      "duration": "Week 1-2",
+      "tasks": [
+        "Database setup with all tables",
+        "Authentication system",
+        "Basic UI framework",
+        "CSS variables and design system"
+      ]
+    },
+    "phase_2": {
+      "name": "Admin Core Features",
+      "duration": "Week 3-4",
+      "tasks": [
+        "Admin dashboard with KPIs",
+        "Member management CRUD",
+        "Membership plans management"
+      ]
+    },
+    "phase_3": {
+      "name": "Membership & Payments",
+      "duration": "Week 5",
+      "tasks": [
+        "Membership assignment system",
+        "Payment management",
+        "Receipt generation"
+      ]
+    },
+    "phase_4": {
+      "name": "Attendance & Tracking",
+      "duration": "Week 6",
+      "tasks": [
+        "Check-in/check-out system",
+        "Attendance reports",
+        "Trainer management"
+      ]
+    },
+    "phase_5": {
+      "name": "Advanced Features",
+      "duration": "Week 7-8",
+      "tasks": [
+        "Workout plans system",
+        "Reports & analytics",
+        "Export functionality"
+      ]
+    },
+    "phase_6": {
+      "name": "Member & Trainer Portals",
+      "duration": "Week 9",
+      "tasks": [
+        "Member dashboard",
+        "Trainer dashboard",
+        "Role-specific features"
+      ]
+    },
+    "phase_7": {
+      "name": "Testing & Polish",
+      "duration": "Week 10",
+      "tasks": [
+        "Security testing",
+        "Responsive testing",
+        "Performance optimization",
+        "Bug fixes"
+      ]
+    }
+  },
+  "testing_scenarios": [
+    "Invalid login credentials",
+    "Expired membership access",
+    "Duplicate email registration",
+    "File upload beyond 2MB",
+    "Special characters in search",
+    "Role-based access violations"
+  ],
+  "deployment_requirements": {
+    "environment_config": "dev/prod DB credentials",
+    "secure_uploads": "Outside web root or htaccess",
+    "production_optimization": "Minify CSS/JS",
+    "error_reporting": "Enable in dev, disable in prod"
+  }
+}
