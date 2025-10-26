@@ -1,261 +1,74 @@
 {
-  "project": "FitHub Gym Management System",
+  "project": "Simple Gym Management System",
   "version": "1.0.0",
-  "total_phases": 7,
-  "estimated_duration": "10 weeks",
+  "total_phases": 3,
+  "estimated_duration": "3 weeks",
   "phases": {
     "phase_1": {
-      "name": "Foundation & Core Setup",
-      "duration": "Week 1-2",
+      "name": "Basic Setup",
+      "duration": "Week 1",
       "status": "pending",
       "priority": "high",
       "tasks": {
         "database_setup": {
           "id": "DB-001",
-          "title": "Create MySQL Database Schema",
-          "description": "Set up complete database with all 8 tables, foreign keys, and indexes",
+          "title": "Create Simple Database",
+          "description": "Set up basic database with 2 tables: members and attendance",
           "status": "pending",
           "priority": "critical",
-          "estimated_hours": 8,
+          "estimated_hours": 2,
           "dependencies": [],
           "subtasks": [
             {
               "id": "DB-001-1",
-              "title": "Create database and configure connection",
+              "title": "Create database and basic connection",
               "status": "pending"
             },
             {
               "id": "DB-001-2", 
-              "title": "Create users table with proper constraints",
+              "title": "Create members table",
               "status": "pending"
             },
             {
               "id": "DB-001-3",
-              "title": "Create members table with foreign key to users",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-4",
-              "title": "Create trainers table with foreign key to users",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-5",
-              "title": "Create membership_plans table",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-6",
-              "title": "Create memberships table with foreign keys",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-7",
-              "title": "Create payments table with foreign keys",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-8",
-              "title": "Create attendance table with foreign keys",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-9",
-              "title": "Create workout_plans table with JSON support",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-10",
-              "title": "Create trainer_assignments table",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-11",
-              "title": "Add indexes for performance optimization",
-              "status": "pending"
-            },
-            {
-              "id": "DB-001-12",
-              "title": "Insert sample data for testing",
+              "title": "Create attendance table",
               "status": "pending"
             }
           ]
         },
         "config_setup": {
           "id": "CFG-001",
-          "title": "Configuration Files Setup",
-          "description": "Create database connection and configuration files",
+          "title": "Basic Configuration",
+          "description": "Create simple database connection file",
           "status": "pending",
           "priority": "critical",
-          "estimated_hours": 4,
+          "estimated_hours": 1,
           "dependencies": ["DB-001"],
           "subtasks": [
             {
               "id": "CFG-001-1",
-              "title": "Create config/database.php with PDO connection",
-              "status": "pending"
-            },
-            {
-              "id": "CFG-001-2",
-              "title": "Create config/config.php with constants",
-              "status": "pending"
-            },
-            {
-              "id": "CFG-001-3",
-              "title": "Set up environment-based configuration",
+              "title": "Create config.php with database connection",
               "status": "pending"
             }
           ]
         },
-        "authentication_system": {
-          "id": "AUTH-001",
-          "title": "Authentication System",
-          "description": "Implement secure login/logout with session management",
-          "status": "pending",
-          "priority": "critical",
-          "estimated_hours": 12,
-          "dependencies": ["CFG-001"],
-          "subtasks": [
-            {
-              "id": "AUTH-001-1",
-              "title": "Create includes/session.php for session management",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-2",
-              "title": "Create includes/auth.php for authentication logic",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-3",
-              "title": "Create API/login.php for login endpoint",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-4",
-              "title": "Create API/logout.php for logout endpoint",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-5",
-              "title": "Create index.php login page with form",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-6",
-              "title": "Implement password hashing with bcrypt",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-7",
-              "title": "Add role-based redirect after login",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-8",
-              "title": "Implement session timeout (30 minutes)",
-              "status": "pending"
-            },
-            {
-              "id": "AUTH-001-9",
-              "title": "Add CSRF token protection",
-              "status": "pending"
-            }
-          ]
-        },
-        "ui_framework": {
-          "id": "UI-001",
-          "title": "UI Framework & Design System",
-          "description": "Create CSS framework with design system and responsive layout",
+        "homepage": {
+          "id": "HOME-001",
+          "title": "Create Homepage",
+          "description": "Create simple homepage with Bootstrap navigation",
           "status": "pending",
           "priority": "high",
-          "estimated_hours": 16,
-          "dependencies": [],
-          "subtasks": [
-            {
-              "id": "UI-001-1",
-              "title": "Create CSS variables for color palette",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-2",
-              "title": "Set up Inter Tight font integration",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-3",
-              "title": "Create base CSS reset and utilities",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-4",
-              "title": "Create responsive navigation sidebar",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-5",
-              "title": "Create card components",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-6",
-              "title": "Create button components with hover states",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-7",
-              "title": "Create form components with validation styles",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-8",
-              "title": "Create responsive grid system",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-9",
-              "title": "Add mobile hamburger menu",
-              "status": "pending"
-            },
-            {
-              "id": "UI-001-10",
-              "title": "Create responsive breakpoints",
-              "status": "pending"
-            }
-          ]
-        },
-        "helper_functions": {
-          "id": "HELPER-001",
-          "title": "Helper Functions & Utilities",
-          "description": "Create reusable PHP functions and JavaScript utilities",
-          "status": "pending",
-          "priority": "medium",
-          "estimated_hours": 8,
+          "estimated_hours": 2,
           "dependencies": ["CFG-001"],
           "subtasks": [
             {
-              "id": "HELPER-001-1",
-              "title": "Create includes/functions.php with utility functions",
+              "id": "HOME-001-1",
+              "title": "Create index.php with Bootstrap layout",
               "status": "pending"
             },
             {
-              "id": "HELPER-001-2",
-              "title": "Add input sanitization functions",
-              "status": "pending"
-            },
-            {
-              "id": "HELPER-001-3",
-              "title": "Add validation helper functions",
-              "status": "pending"
-            },
-            {
-              "id": "HELPER-001-4",
-              "title": "Create js/main.js with common functions",
-              "status": "pending"
-            },
-            {
-              "id": "HELPER-001-5",
-              "title": "Add AJAX utility functions",
+              "id": "HOME-001-2",
+              "title": "Add navigation menu",
               "status": "pending"
             }
           ]
@@ -263,165 +76,75 @@
       }
     },
     "phase_2": {
-      "name": "Admin Core Features",
-      "duration": "Week 3-4",
+      "name": "Member Management",
+      "duration": "Week 2",
       "status": "pending",
       "priority": "high",
       "tasks": {
-        "admin_dashboard": {
-          "id": "ADMIN-001",
-          "title": "Admin Dashboard",
-          "description": "Create admin dashboard with KPIs, charts, and quick actions",
-          "status": "pending",
-          "priority": "high",
-          "estimated_hours": 20,
-          "dependencies": ["AUTH-001", "UI-001"],
-          "subtasks": [
-            {
-              "id": "ADMIN-001-1",
-              "title": "Create admin/dashboard.php layout",
-              "status": "pending"
-            },
-            {
-              "id": "ADMIN-001-2",
-              "title": "Create KPI cards (Total Members, Active Members, Today's Attendance, Monthly Revenue)",
-              "status": "pending"
-            },
-            {
-              "id": "ADMIN-001-3",
-              "title": "Integrate Chart.js for revenue chart (last 6 months)",
-              "status": "pending"
-            },
-            {
-              "id": "ADMIN-001-4",
-              "title": "Create recent payments table (last 10)",
-              "status": "pending"
-            },
-            {
-              "id": "ADMIN-001-5",
-              "title": "Add membership expiry alerts (expiring in 7 days)",
-              "status": "pending"
-            },
-            {
-              "id": "ADMIN-001-6",
-              "title": "Create quick action buttons",
-              "status": "pending"
-            },
-            {
-              "id": "ADMIN-001-7",
-              "title": "Add responsive design for mobile",
-              "status": "pending"
-            }
-          ]
-        },
-        "member_management": {
+        "member_list": {
           "id": "MEMBER-001",
-          "title": "Member Management System",
-          "description": "Complete CRUD operations for member management",
+          "title": "List Members",
+          "description": "Create simple page to display all members",
           "status": "pending",
           "priority": "high",
-          "estimated_hours": 24,
-          "dependencies": ["AUTH-001", "UI-001"],
+          "estimated_hours": 3,
+          "dependencies": ["HOME-001"],
           "subtasks": [
             {
               "id": "MEMBER-001-1",
-              "title": "Create admin/members.php list page",
+              "title": "Create members.php page",
               "status": "pending"
             },
             {
               "id": "MEMBER-001-2",
-              "title": "Add search functionality (name, phone, email)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-3",
-              "title": "Add status filtering (active/inactive/suspended)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-4",
-              "title": "Add sortable table columns",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-5",
-              "title": "Implement pagination (20 per page)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-6",
-              "title": "Create admin/member-add.php form",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-7",
-              "title": "Add photo upload functionality (max 2MB, jpg/png)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-8",
-              "title": "Create admin/member-edit.php form",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-9",
-              "title": "Create admin/member-view.php detail page",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-10",
-              "title": "Create API/members-api.php for CRUD operations",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-11",
-              "title": "Add form validation (client and server side)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-001-12",
-              "title": "Add delete confirmation with SweetAlert2",
+              "title": "Display members in Bootstrap table",
               "status": "pending"
             }
           ]
         },
-        "membership_plans": {
-          "id": "PLANS-001",
-          "title": "Membership Plans Management",
-          "description": "Create and manage membership plans with dynamic features",
+        "add_member": {
+          "id": "MEMBER-002",
+          "title": "Add Member Form",
+          "description": "Create form to add new members",
           "status": "pending",
           "priority": "high",
-          "estimated_hours": 16,
-          "dependencies": ["AUTH-001", "UI-001"],
+          "estimated_hours": 4,
+          "dependencies": ["MEMBER-001"],
           "subtasks": [
             {
-              "id": "PLANS-001-1",
-              "title": "Create admin/plans.php list page with grid layout",
+              "id": "MEMBER-002-1",
+              "title": "Create add member form",
               "status": "pending"
             },
             {
-              "id": "PLANS-001-2",
-              "title": "Add plan creation form with dynamic features",
+              "id": "MEMBER-002-2",
+              "title": "Add form validation",
               "status": "pending"
             },
             {
-              "id": "PLANS-001-3",
-              "title": "Add plan editing functionality",
+              "id": "MEMBER-002-3",
+              "title": "Save member to database",
+              "status": "pending"
+            }
+          ]
+        },
+        "edit_member": {
+          "id": "MEMBER-003",
+          "title": "Edit Member",
+          "description": "Allow editing and deleting members",
+          "status": "pending",
+          "priority": "medium",
+          "estimated_hours": 3,
+          "dependencies": ["MEMBER-002"],
+          "subtasks": [
+            {
+              "id": "MEMBER-003-1",
+              "title": "Create edit member form",
               "status": "pending"
             },
             {
-              "id": "PLANS-001-4",
-              "title": "Add status toggle (active/inactive)",
-              "status": "pending"
-            },
-            {
-              "id": "PLANS-001-5",
-              "title": "Create API/plans-api.php for CRUD operations",
-              "status": "pending"
-            },
-            {
-              "id": "PLANS-001-6",
-              "title": "Add plan deletion with confirmation",
+              "id": "MEMBER-003-2",
+              "title": "Add delete functionality",
               "status": "pending"
             }
           ]
@@ -429,636 +152,70 @@
       }
     },
     "phase_3": {
-      "name": "Membership & Payments",
-      "duration": "Week 5",
+      "name": "Attendance System",
+      "duration": "Week 3",
       "status": "pending",
       "priority": "high",
       "tasks": {
-        "membership_assignment": {
-          "id": "MEMBERSHIP-001",
-          "title": "Membership Assignment System",
-          "description": "Assign memberships to members with auto-calculation",
-          "status": "pending",
-          "priority": "high",
-          "estimated_hours": 12,
-          "dependencies": ["MEMBER-001", "PLANS-001"],
-          "subtasks": [
-            {
-              "id": "MEMBERSHIP-001-1",
-              "title": "Create membership assignment form",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBERSHIP-001-2",
-              "title": "Add member selection (searchable dropdown)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBERSHIP-001-3",
-              "title": "Add plan selection dropdown",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBERSHIP-001-4",
-              "title": "Add start date picker with Flatpickr",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBERSHIP-001-5",
-              "title": "Auto-calculate end date from plan duration",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBERSHIP-001-6",
-              "title": "Create membership record in database",
-              "status": "pending"
-            }
-          ]
-        },
-        "payment_management": {
-          "id": "PAYMENT-001",
-          "title": "Payment Management System",
-          "description": "Handle payment recording and receipt generation",
-          "status": "pending",
-          "priority": "high",
-          "estimated_hours": 16,
-          "dependencies": ["MEMBERSHIP-001"],
-          "subtasks": [
-            {
-              "id": "PAYMENT-001-1",
-              "title": "Create admin/payments.php list page",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-2",
-              "title": "Add date range filter",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-3",
-              "title": "Add status filter (completed/pending/failed)",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-4",
-              "title": "Add search by member name/transaction ID",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-5",
-              "title": "Create payment recording form",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-6",
-              "title": "Add payment method selection",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-7",
-              "title": "Add transaction ID input",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-8",
-              "title": "Create API/payments-api.php for CRUD operations",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-9",
-              "title": "Implement receipt generation with jsPDF",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-10",
-              "title": "Add receipt numbering (REC-YYYYMMDD-XXX)",
-              "status": "pending"
-            },
-            {
-              "id": "PAYMENT-001-11",
-              "title": "Add export to PDF/CSV functionality",
-              "status": "pending"
-            }
-          ]
-        }
-      }
-    },
-    "phase_4": {
-      "name": "Attendance & Tracking",
-      "duration": "Week 6",
-      "status": "pending",
-      "priority": "high",
-      "tasks": {
-        "attendance_system": {
+        "attendance_checkin": {
           "id": "ATTENDANCE-001",
-          "title": "Attendance Tracking System",
-          "description": "Check-in/check-out system with reports",
+          "title": "Check-in System",
+          "description": "Simple check-in system for members",
           "status": "pending",
           "priority": "high",
-          "estimated_hours": 20,
-          "dependencies": ["MEMBER-001"],
+          "estimated_hours": 4,
+          "dependencies": ["MEMBER-003"],
           "subtasks": [
             {
               "id": "ATTENDANCE-001-1",
-              "title": "Create admin/attendance.php check-in interface",
+              "title": "Create attendance.php page",
               "status": "pending"
             },
             {
               "id": "ATTENDANCE-001-2",
-              "title": "Add member search (name/phone/ID)",
+              "title": "Add member search dropdown",
               "status": "pending"
             },
             {
               "id": "ATTENDANCE-001-3",
-              "title": "Display member photo and details for confirmation",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-4",
-              "title": "Add check-in button with timestamp recording",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-5",
-              "title": "Add check-out button with timestamp update",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-6",
-              "title": "Create today's attendance list",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-7",
-              "title": "Create API/attendance-api.php for operations",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-8",
-              "title": "Add attendance reports with date range filter",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-9",
-              "title": "Add member-wise attendance view",
-              "status": "pending"
-            },
-            {
-              "id": "ATTENDANCE-001-10",
-              "title": "Add export to CSV functionality",
+              "title": "Add check-in button",
               "status": "pending"
             }
           ]
         },
-        "trainer_management": {
-          "id": "TRAINER-001",
-          "title": "Trainer Management System",
-          "description": "CRUD operations for trainer management",
+        "attendance_list": {
+          "id": "ATTENDANCE-002",
+          "title": "Attendance List",
+          "description": "Display today's attendance",
           "status": "pending",
           "priority": "medium",
-          "estimated_hours": 16,
-          "dependencies": ["AUTH-001", "UI-001"],
+          "estimated_hours": 2,
+          "dependencies": ["ATTENDANCE-001"],
           "subtasks": [
             {
-              "id": "TRAINER-001-1",
-              "title": "Create admin/trainers.php list page",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-2",
-              "title": "Add trainer creation form",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-3",
-              "title": "Add specialization dropdown (Strength, Cardio, Yoga, CrossFit, etc.)",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-4",
-              "title": "Add photo upload functionality",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-5",
-              "title": "Add trainer editing functionality",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-6",
-              "title": "Create API/trainers-api.php for CRUD operations",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-7",
-              "title": "Add trainer-member assignment system",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-001-8",
-              "title": "Add status management (active/inactive)",
-              "status": "pending"
-            }
-          ]
-        }
-      }
-    },
-    "phase_5": {
-      "name": "Advanced Features",
-      "duration": "Week 7-8",
-      "status": "pending",
-      "priority": "medium",
-      "tasks": {
-        "workout_plans": {
-          "id": "WORKOUT-001",
-          "title": "Workout Plans System",
-          "description": "Create and manage workout plans with JSON structure",
-          "status": "pending",
-          "priority": "medium",
-          "estimated_hours": 20,
-          "dependencies": ["TRAINER-001"],
-          "subtasks": [
-            {
-              "id": "WORKOUT-001-1",
-              "title": "Create trainer/workout-plans.php interface",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-2",
-              "title": "Add member selection for workout plan creation",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-3",
-              "title": "Create dynamic exercise form (day, exercise, sets, reps, rest time)",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-4",
-              "title": "Add plan duration (start/end date)",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-5",
-              "title": "Store workout plan as JSON in database",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-6",
-              "title": "Create API/workout-plans-api.php for operations",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-7",
-              "title": "Create member view for workout plans",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-8",
-              "title": "Add day-wise exercise breakdown display",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-9",
-              "title": "Add progress tracking with checkboxes",
-              "status": "pending"
-            },
-            {
-              "id": "WORKOUT-001-10",
-              "title": "Add trainer notes functionality",
+              "id": "ATTENDANCE-002-1",
+              "title": "Show today's check-ins",
               "status": "pending"
             }
           ]
         },
-        "reports_analytics": {
+        "basic_reports": {
           "id": "REPORTS-001",
-          "title": "Reports & Analytics System",
-          "description": "Generate comprehensive reports and analytics",
+          "title": "Basic Reports",
+          "description": "Simple attendance reports",
           "status": "pending",
-          "priority": "medium",
-          "estimated_hours": 16,
-          "dependencies": ["PAYMENT-001", "ATTENDANCE-001"],
+          "priority": "low",
+          "estimated_hours": 2,
+          "dependencies": ["ATTENDANCE-002"],
           "subtasks": [
             {
               "id": "REPORTS-001-1",
-              "title": "Create admin/reports.php main page",
+              "title": "Create reports.php page",
               "status": "pending"
             },
             {
               "id": "REPORTS-001-2",
-              "title": "Create revenue report with monthly/yearly graphs",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-3",
-              "title": "Add payment method breakdown (pie chart)",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-4",
-              "title": "Create membership report (active vs inactive)",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-5",
-              "title": "Add plan-wise distribution chart",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-6",
-              "title": "Create attendance report with daily averages",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-7",
-              "title": "Add peak hours analysis",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-8",
-              "title": "Add member attendance percentage",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-9",
-              "title": "Add date range picker for all reports",
-              "status": "pending"
-            },
-            {
-              "id": "REPORTS-001-10",
-              "title": "Add export to PDF functionality",
-              "status": "pending"
-            }
-          ]
-        }
-      }
-    },
-    "phase_6": {
-      "name": "Member & Trainer Portals",
-      "duration": "Week 9",
-      "status": "pending",
-      "priority": "medium",
-      "tasks": {
-        "member_portal": {
-          "id": "MEMBER-PORTAL-001",
-          "title": "Member Portal Dashboard",
-          "description": "Create member-specific dashboard and features",
-          "status": "pending",
-          "priority": "medium",
-          "estimated_hours": 16,
-          "dependencies": ["ATTENDANCE-001", "WORKOUT-001"],
-          "subtasks": [
-            {
-              "id": "MEMBER-PORTAL-001-1",
-              "title": "Create member/dashboard.php layout",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-2",
-              "title": "Add membership status card (active/days remaining)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-3",
-              "title": "Create attendance calendar (current month)",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-4",
-              "title": "Add green dots for present days",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-5",
-              "title": "Create member/payments.php for payment history",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-6",
-              "title": "Add assigned trainer details display",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-7",
-              "title": "Create member/workout-plan.php for current plan",
-              "status": "pending"
-            },
-            {
-              "id": "MEMBER-PORTAL-001-8",
-              "title": "Add monthly attendance statistics",
-              "status": "pending"
-            }
-          ]
-        },
-        "trainer_portal": {
-          "id": "TRAINER-PORTAL-001",
-          "title": "Trainer Portal Dashboard",
-          "description": "Create trainer-specific dashboard and features",
-          "status": "pending",
-          "priority": "medium",
-          "estimated_hours": 12,
-          "dependencies": ["TRAINER-001", "WORKOUT-001"],
-          "subtasks": [
-            {
-              "id": "TRAINER-PORTAL-001-1",
-              "title": "Create trainer/dashboard.php layout",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-PORTAL-001-2",
-              "title": "Add assigned members count display",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-PORTAL-001-3",
-              "title": "Create today's schedule display",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-PORTAL-001-4",
-              "title": "Add recent attendance of assigned members",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-PORTAL-001-5",
-              "title": "Create trainer/assigned-members.php page",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-PORTAL-001-6",
-              "title": "Add quick access to workout plans",
-              "status": "pending"
-            },
-            {
-              "id": "TRAINER-PORTAL-001-7",
-              "title": "Create trainer/attendance.php for marking attendance",
-              "status": "pending"
-            }
-          ]
-        }
-      }
-    },
-    "phase_7": {
-      "name": "Testing & Polish",
-      "duration": "Week 10",
-      "status": "pending",
-      "priority": "high",
-      "tasks": {
-        "security_testing": {
-          "id": "SECURITY-001",
-          "title": "Security Testing & Hardening",
-          "description": "Comprehensive security testing and fixes",
-          "status": "pending",
-          "priority": "critical",
-          "estimated_hours": 12,
-          "dependencies": ["MEMBER-PORTAL-001", "TRAINER-PORTAL-001"],
-          "subtasks": [
-            {
-              "id": "SECURITY-001-1",
-              "title": "Test SQL injection prevention",
-              "status": "pending"
-            },
-            {
-              "id": "SECURITY-001-2",
-              "title": "Test XSS prevention",
-              "status": "pending"
-            },
-            {
-              "id": "SECURITY-001-3",
-              "title": "Test CSRF protection",
-              "status": "pending"
-            },
-            {
-              "id": "SECURITY-001-4",
-              "title": "Test role-based access control",
-              "status": "pending"
-            },
-            {
-              "id": "SECURITY-001-5",
-              "title": "Test file upload security",
-              "status": "pending"
-            },
-            {
-              "id": "SECURITY-001-6",
-              "title": "Test session security",
-              "status": "pending"
-            }
-          ]
-        },
-        "responsive_testing": {
-          "id": "RESPONSIVE-001",
-          "title": "Responsive Design Testing",
-          "description": "Test and fix responsive design across all devices",
-          "status": "pending",
-          "priority": "high",
-          "estimated_hours": 8,
-          "dependencies": ["MEMBER-PORTAL-001", "TRAINER-PORTAL-001"],
-          "subtasks": [
-            {
-              "id": "RESPONSIVE-001-1",
-              "title": "Test mobile layout (320px-767px)",
-              "status": "pending"
-            },
-            {
-              "id": "RESPONSIVE-001-2",
-              "title": "Test tablet layout (768px-1023px)",
-              "status": "pending"
-            },
-            {
-              "id": "RESPONSIVE-001-3",
-              "title": "Test desktop layout (1024px+)",
-              "status": "pending"
-            },
-            {
-              "id": "RESPONSIVE-001-4",
-              "title": "Fix hamburger menu functionality",
-              "status": "pending"
-            },
-            {
-              "id": "RESPONSIVE-001-5",
-              "title": "Test touch-friendly buttons (min 44px)",
-              "status": "pending"
-            },
-            {
-              "id": "RESPONSIVE-001-6",
-              "title": "Test stacked cards on mobile",
-              "status": "pending"
-            }
-          ]
-        },
-        "performance_optimization": {
-          "id": "PERFORMANCE-001",
-          "title": "Performance Optimization",
-          "description": "Optimize application performance and loading times",
-          "status": "pending",
-          "priority": "medium",
-          "estimated_hours": 8,
-          "dependencies": ["SECURITY-001", "RESPONSIVE-001"],
-          "subtasks": [
-            {
-              "id": "PERFORMANCE-001-1",
-              "title": "Optimize database queries",
-              "status": "pending"
-            },
-            {
-              "id": "PERFORMANCE-001-2",
-              "title": "Add database indexes where needed",
-              "status": "pending"
-            },
-            {
-              "id": "PERFORMANCE-001-3",
-              "title": "Minify CSS and JavaScript files",
-              "status": "pending"
-            },
-            {
-              "id": "PERFORMANCE-001-4",
-              "title": "Optimize image uploads and storage",
-              "status": "pending"
-            },
-            {
-              "id": "PERFORMANCE-001-5",
-              "title": "Add caching where appropriate",
-              "status": "pending"
-            }
-          ]
-        },
-        "bug_fixes": {
-          "id": "BUGS-001",
-          "title": "Bug Fixes & Final Testing",
-          "description": "Fix identified bugs and perform final testing",
-          "status": "pending",
-          "priority": "high",
-          "estimated_hours": 12,
-          "dependencies": ["PERFORMANCE-001"],
-          "subtasks": [
-            {
-              "id": "BUGS-001-1",
-              "title": "Test all user workflows",
-              "status": "pending"
-            },
-            {
-              "id": "BUGS-001-2",
-              "title": "Fix form validation issues",
-              "status": "pending"
-            },
-            {
-              "id": "BUGS-001-3",
-              "title": "Fix AJAX error handling",
-              "status": "pending"
-            },
-            {
-              "id": "BUGS-001-4",
-              "title": "Test error scenarios",
-              "status": "pending"
-            },
-            {
-              "id": "BUGS-001-5",
-              "title": "Fix cross-browser compatibility",
-              "status": "pending"
-            },
-            {
-              "id": "BUGS-001-6",
-              "title": "Final integration testing",
+              "title": "Show member attendance count",
               "status": "pending"
             }
           ]
@@ -1069,78 +226,54 @@
   "testing_scenarios": [
     {
       "id": "TEST-001",
-      "title": "Invalid login credentials",
-      "description": "Test system response to wrong username/password",
+      "title": "Add new member",
+      "description": "Test adding a new member to the system",
       "priority": "high"
     },
     {
       "id": "TEST-002", 
-      "title": "Expired membership access",
-      "description": "Test member access with expired membership",
+      "title": "Check-in member",
+      "description": "Test member check-in functionality",
       "priority": "high"
     },
     {
       "id": "TEST-003",
-      "title": "Duplicate email registration",
-      "description": "Test prevention of duplicate email addresses",
+      "title": "Edit member details",
+      "description": "Test editing member information",
       "priority": "medium"
     },
     {
       "id": "TEST-004",
-      "title": "File upload beyond 2MB",
-      "description": "Test file size validation for photo uploads",
+      "title": "View attendance list",
+      "description": "Test viewing today's attendance",
       "priority": "medium"
-    },
-    {
-      "id": "TEST-005",
-      "title": "Special characters in search",
-      "description": "Test search functionality with special characters",
-      "priority": "low"
-    },
-    {
-      "id": "TEST-006",
-      "title": "Role-based access violations",
-      "description": "Test unauthorized access attempts",
-      "priority": "critical"
     }
   ],
   "deployment_checklist": [
     {
       "id": "DEPLOY-001",
-      "title": "Environment configuration",
-      "description": "Set up dev/prod database credentials",
+      "title": "XAMPP/WAMP setup",
+      "description": "Install XAMPP or WAMP server",
       "status": "pending"
     },
     {
       "id": "DEPLOY-002",
-      "title": "Secure uploads folder",
-      "description": "Move uploads outside web root or add htaccess",
+      "title": "Database setup",
+      "description": "Create database and import schema",
       "status": "pending"
     },
     {
       "id": "DEPLOY-003",
-      "title": "Production optimization",
-      "description": "Minify CSS/JS for production",
-      "status": "pending"
-    },
-    {
-      "id": "DEPLOY-004",
-      "title": "Error reporting",
-      "description": "Enable in dev, disable in prod",
-      "status": "pending"
-    },
-    {
-      "id": "DEPLOY-005",
-      "title": "Database backup",
-      "description": "Create initial database backup",
+      "title": "File permissions",
+      "description": "Set proper file permissions",
       "status": "pending"
     }
   ],
   "progress_tracking": {
-    "total_tasks": 0,
+    "total_tasks": 9,
     "completed_tasks": 0,
     "in_progress_tasks": 0,
-    "pending_tasks": 0,
+    "pending_tasks": 9,
     "overall_progress": "0%"
   }
 }
