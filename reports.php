@@ -54,7 +54,9 @@ $top_performers_result = $conn->query($top_performers_query);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="View gym attendance reports and statistics">
+    <meta name="theme-color" content="#667eea">
     <title>Reports - Gym System</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -81,19 +83,19 @@ $top_performers_result = $conn->query($top_performers_query);
             <div class="card-body">
                 <form method="GET" action="reports.php">
                     <div class="row">
-                        <div class="col-4">
+                        <div class="col-12 col-4">
                             <div class="form-group">
                                 <label class="form-label">Start Date</label>
                                 <input type="date" class="form-control" name="start_date" value="<?php echo $start_date; ?>">
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-12 col-4">
                             <div class="form-group">
                                 <label class="form-label">End Date</label>
                                 <input type="date" class="form-control" name="end_date" value="<?php echo $end_date; ?>">
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-12 col-4">
                             <div class="form-group">
                                 <label class="form-label">&nbsp;</label>
                                 <button type="submit" class="btn btn-primary btn-block">🔍 Filter</button>
@@ -106,21 +108,21 @@ $top_performers_result = $conn->query($top_performers_query);
 
         <!-- Statistics Cards -->
         <div class="row mt-2">
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="stats-card">
                     <div class="icon">👥</div>
                     <h2><?php echo $total_members; ?></h2>
                     <p>Total Members</p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="stats-card">
                     <div class="icon">✅</div>
                     <h2><?php echo $active_members; ?></h2>
                     <p>Active Members</p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="stats-card">
                     <div class="icon">📋</div>
                     <h2><?php echo $total_checkins; ?></h2>
@@ -132,7 +134,7 @@ $top_performers_result = $conn->query($top_performers_query);
 
         <div class="row mt-2">
             <!-- Member-wise Attendance -->
-            <div class="col-8">
+            <div class="col-12 col-8">
                 <div class="card">
                     <div class="card-header">👤 Member Attendance Summary</div>
                     <div class="card-body">
@@ -200,7 +202,7 @@ $top_performers_result = $conn->query($top_performers_query);
             </div>
 
             <!-- Side Cards -->
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <!-- Top Performers -->
                 <div class="card">
                     <div class="card-header success">🏆 Top Performers</div>

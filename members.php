@@ -96,7 +96,9 @@ $members_result = $conn->query($members_query);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Manage gym members - Add, edit, and view member information">
+    <meta name="theme-color" content="#667eea">
     <title>Members Management - Gym System</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -118,7 +120,7 @@ $members_result = $conn->query($members_query);
     <div class="container mt-4">
         <div class="row">
             <!-- Add/Edit Member Form -->
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="card">
                     <div class="card-header">
                         <?php echo $edit_member ? '✏️ Edit Member' : '➕ Add New Member'; ?>
@@ -200,7 +202,7 @@ $members_result = $conn->query($members_query);
             </div>
 
             <!-- Members List -->
-            <div class="col-8">
+            <div class="col-12 col-8">
                 <div class="card">
                     <div class="card-header success">
                         👥 Members List (Total: <?php echo $members_result->num_rows; ?>)

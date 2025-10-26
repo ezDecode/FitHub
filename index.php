@@ -19,7 +19,9 @@ $today_attendance = $result->fetch_assoc()['total'];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Modern Gym Management System - Manage members, track attendance, and view reports">
+    <meta name="theme-color" content="#667eea">
     <title>Gym Management System - Home</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -49,21 +51,21 @@ $today_attendance = $result->fetch_assoc()['total'];
     <!-- Statistics Section -->
     <section class="container mt-4">
         <div class="row">
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="stats-card">
                     <div class="icon">👥</div>
                     <h2><?php echo $total_members; ?></h2>
                     <p>Total Members</p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="stats-card">
                     <div class="icon">✅</div>
                     <h2><?php echo $active_members; ?></h2>
                     <p>Active Members</p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-4">
                 <div class="stats-card">
                     <div class="icon">📋</div>
                     <h2><?php echo $today_attendance; ?></h2>
@@ -76,43 +78,43 @@ $today_attendance = $result->fetch_assoc()['total'];
     <!-- Features Section -->
     <section class="container mt-4">
         <div class="row">
-            <div class="col-3">
+            <div class="col-6 col-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon" style="font-size: 3rem; margin-bottom: 15px;">➕</div>
-                        <h3>Add Members</h3>
-                        <p>Register new gym members quickly</p>
-                        <a href="members.php" class="btn btn-primary btn-sm">Go to Members</a>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem;">Add Members</h3>
+                        <p style="color: #6b7280; margin-bottom: 1rem;">Register new gym members quickly</p>
+                        <a href="members.php" class="btn btn-primary btn-sm btn-block">Go to Members</a>
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-6 col-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon" style="font-size: 3rem; margin-bottom: 15px;">📋</div>
-                        <h3>View Members</h3>
-                        <p>See all registered members</p>
-                        <a href="members.php" class="btn btn-success btn-sm">View List</a>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem;">View Members</h3>
+                        <p style="color: #6b7280; margin-bottom: 1rem;">See all registered members</p>
+                        <a href="members.php" class="btn btn-success btn-sm btn-block">View List</a>
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-6 col-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon" style="font-size: 3rem; margin-bottom: 15px;">⏰</div>
-                        <h3>Track Attendance</h3>
-                        <p>Mark check-in and check-out</p>
-                        <a href="attendance.php" class="btn btn-info btn-sm">Track Now</a>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem;">Track Attendance</h3>
+                        <p style="color: #6b7280; margin-bottom: 1rem;">Mark check-in and check-out</p>
+                        <a href="attendance.php" class="btn btn-info btn-sm btn-block">Track Now</a>
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-6 col-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon" style="font-size: 3rem; margin-bottom: 15px;">📈</div>
-                        <h3>View Reports</h3>
-                        <p>Basic attendance statistics</p>
-                        <a href="reports.php" class="btn btn-warning btn-sm">View Reports</a>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem;">View Reports</h3>
+                        <p style="color: #6b7280; margin-bottom: 1rem;">Basic attendance statistics</p>
+                        <a href="reports.php" class="btn btn-warning btn-sm btn-block">View Reports</a>
                     </div>
                 </div>
             </div>
