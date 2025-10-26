@@ -1,70 +1,70 @@
 /**
- * Simple Gym Management System - Main JavaScript
- * Version: 1.0.0
+ * Simple Gym Management System - Pure JavaScript
+ * NO Bootstrap - Vanilla JS Only
+ * Version: 2.0.0
  */
 
 // ===========================
-// Document Ready
+// DOCUMENT READY
 // ===========================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Gym Management System Loaded');
+    console.log('🏋️ Gym Management System Loaded (Pure JS)');
     
-    // Initialize all functions
-    initDeleteConfirmations();
+    // Initialize functions
     initFormValidation();
+    initDeleteConfirmations();
     updateCurrentTime();
-    initTooltips();
-    initAlertAutoClose();
+    autoCloseAlerts();
 });
 
 // ===========================
-// Delete Confirmations
+// MOBILE MENU TOGGLE
 // ===========================
-function initDeleteConfirmations() {
-    const deleteLinks = document.querySelectorAll('a[href*="delete="]');
-    
-    deleteLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    });
+function toggleMenu() {
+    const menu = document.getElementById('navMenu');
+    if (menu) {
+        menu.classList.toggle('active');
+    }
 }
 
 // ===========================
-// Form Validation
+// FORM VALIDATION
 // ===========================
 function initFormValidation() {
     const forms = document.querySelectorAll('form');
     
     forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            // Email validation
-            const emailInputs = form.querySelectorAll('input[type="email"]');
-            emailInputs.forEach(input => {
-                if (input.value && !isValidEmail(input.value)) {
-                    e.preventDefault();
-                    showError(input, 'Please enter a valid email address');
+        // Email validation
+        const emailInputs = form.querySelectorAll('input[type="email"]');
+        emailInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value && !isValidEmail(this.value)) {
+                    showError(this, 'Please enter a valid email address');
+                } else {
+                    clearError(this);
+                }
+            });
+        });
+        
+        // Phone validation
+        const phoneInputs = form.querySelectorAll('input[name="phone"]');
+        phoneInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value && !isValidPhone(this.value)) {
+                    showError(this, 'Please enter a valid 10-digit phone number');
+                } else {
+                    clearError(this);
                 }
             });
             
-            // Phone validation (10 digits)
-            const phoneInputs = form.querySelectorAll('input[name="phone"]');
-            phoneInputs.forEach(input => {
-                if (input.value && !isValidPhone(input.value)) {
-                    e.preventDefault();
-                    showError(input, 'Please enter a valid 10-digit phone number');
-                }
+            // Only allow numbers
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
             });
         });
     });
 }
 
-// ===========================
-// Validation Functions
-// ===========================
 function isValidEmail(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -76,29 +76,50 @@ function isValidPhone(phone) {
 }
 
 function showError(input, message) {
-    input.classList.add('is-invalid');
+    input.classList.add('error');
     
-    // Remove existing error message
-    const existingError = input.parentElement.querySelector('.invalid-feedback');
+    // Remove existing error
+    const existingError = input.parentElement.querySelector('.error-message');
     if (existingError) {
         existingError.remove();
     }
     
-    // Add new error message
+    // Add new error
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'invalid-feedback';
+    errorDiv.className = 'error-message';
     errorDiv.textContent = message;
     input.parentElement.appendChild(errorDiv);
+}
+
+function clearError(input) {
+    input.classList.remove('error');
+    const errorMsg = input.parentElement.querySelector('.error-message');
+    if (errorMsg) {
+        errorMsg.remove();
+    }
+}
+
+// ===========================
+// DELETE CONFIRMATIONS
+// ===========================
+function initDeleteConfirmations() {
+    const deleteLinks = document.querySelectorAll('a[href*="delete="]');
     
-    // Remove error on input
-    input.addEventListener('input', function() {
-        input.classList.remove('is-invalid');
-        if (errorDiv) errorDiv.remove();
+    deleteLinks.forEach(link => {
+        // Remove existing onclick if present
+        link.removeAttribute('onclick');
+        
+        link.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+                e.preventDefault();
+                return false;
+            }
+        });
     });
 }
 
 // ===========================
-// Update Current Time (for attendance page)
+// REAL-TIME CLOCK UPDATE
 // ===========================
 function updateCurrentTime() {
     const timeInput = document.getElementById('currentTime');
@@ -106,8 +127,10 @@ function updateCurrentTime() {
     if (timeInput) {
         function updateTime() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
-            timeInput.value = timeString;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            timeInput.value = hours + ':' + minutes + ':' + seconds;
         }
         
         updateTime();
@@ -116,33 +139,53 @@ function updateCurrentTime() {
 }
 
 // ===========================
-// Initialize Bootstrap Tooltips
+// AUTO-CLOSE ALERTS
 // ===========================
-function initTooltips() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-}
-
-// ===========================
-// Auto-close Alerts
-// ===========================
-function initAlertAutoClose() {
-    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+function autoCloseAlerts() {
+    const alerts = document.querySelectorAll('.alert');
     
     alerts.forEach(alert => {
         setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000); // Close after 5 seconds
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 500);
+        }, 5000);
     });
 }
 
 // ===========================
-// Member Search Filter (for members page)
+// MODAL FUNCTIONS
 // ===========================
-function filterMembers(searchText) {
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Close modal on outside click
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// ===========================
+// TABLE SEARCH/FILTER
+// ===========================
+function filterTable(searchText) {
     const table = document.querySelector('table tbody');
     if (!table) return;
     
@@ -162,20 +205,29 @@ function filterMembers(searchText) {
 }
 
 // ===========================
-// Export Table to CSV
+// EXPORT TABLE TO CSV
 // ===========================
-function exportTableToCSV(filename) {
+function exportTableToCSV(filename = 'data.csv') {
     const table = document.querySelector('table');
-    if (!table) return;
+    if (!table) {
+        alert('No table found to export');
+        return;
+    }
     
     let csv = [];
     const rows = table.querySelectorAll('tr');
     
     for (let i = 0; i < rows.length; i++) {
-        const row = [], cols = rows[i].querySelectorAll('td, th');
+        const row = [];
+        const cols = rows[i].querySelectorAll('td, th');
         
-        for (let j = 0; j < cols.length - 1; j++) { // Skip last column (actions)
-            row.push(cols[j].innerText);
+        // Skip last column if it's "Actions"
+        const colCount = cols[cols.length - 1].textContent.trim() === 'Actions' ? cols.length - 1 : cols.length;
+        
+        for (let j = 0; j < colCount; j++) {
+            let data = cols[j].textContent.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+            data = data.replace(/"/g, '""'); // Escape quotes
+            row.push('"' + data + '"');
         }
         
         csv.push(row.join(','));
@@ -199,121 +251,126 @@ function downloadCSV(csv, filename) {
 }
 
 // ===========================
-// Print Function
+// PRINT FUNCTION
 // ===========================
 function printPage() {
     window.print();
 }
 
 // ===========================
-// Format Date
+// SHOW LOADING SPINNER
 // ===========================
-function formatDate(date) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(date).toLocaleDateString('en-US', options);
-}
-
-// ===========================
-// Calculate Days Between Dates
-// ===========================
-function daysBetween(date1, date2) {
-    const oneDay = 24 * 60 * 60 * 1000;
-    const firstDate = new Date(date1);
-    const secondDate = new Date(date2);
+function showLoading(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
     
-    return Math.round(Math.abs((firstDate - secondDate) / oneDay));
-}
-
-// ===========================
-// Show Loading Spinner
-// ===========================
-function showLoading(container) {
     const spinner = document.createElement('div');
-    spinner.className = 'spinner-container';
+    spinner.className = 'loading-spinner';
     spinner.innerHTML = `
-        <div class="text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="loading-text mt-3">Loading data...</p>
+        <div style="text-align: center; padding: 40px;">
+            <div style="border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+            <p style="margin-top: 15px; color: #666;">Loading...</p>
         </div>
     `;
     
-    if (container) {
-        container.innerHTML = '';
-        container.appendChild(spinner);
+    container.innerHTML = '';
+    container.appendChild(spinner);
+    
+    // Add spin animation if not exists
+    if (!document.getElementById('spin-animation')) {
+        const style = document.createElement('style');
+        style.id = 'spin-animation';
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+    }
+}
+
+function hideLoading(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const spinner = container.querySelector('.loading-spinner');
+    if (spinner) {
+        spinner.remove();
     }
 }
 
 // ===========================
-// Hide Loading Spinner
-// ===========================
-function hideLoading(container) {
-    if (container) {
-        const spinner = container.querySelector('.spinner-container');
-        if (spinner) {
-            spinner.remove();
-        }
-    }
-}
-
-// ===========================
-// Show Toast Notification
+// TOAST NOTIFICATION
 // ===========================
 function showToast(message, type = 'success') {
-    const toastContainer = document.getElementById('toastContainer');
-    if (!toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-' + type;
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '10000';
+    toast.style.minWidth = '250px';
+    toast.style.animation = 'slideInRight 0.3s ease';
     
-    const toastId = 'toast-' + Date.now();
-    const bgColor = type === 'success' ? 'bg-success' : 
-                    type === 'error' ? 'bg-danger' : 
-                    type === 'warning' ? 'bg-warning' : 'bg-info';
+    document.body.appendChild(toast);
     
-    const toastHTML = `
-        <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    `;
+    setTimeout(() => {
+        toast.style.transition = 'opacity 0.5s';
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 500);
+    }, 3000);
     
-    toastContainer.innerHTML += toastHTML;
-    
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement);
-    toast.show();
-    
-    // Remove after hiding
-    toastElement.addEventListener('hidden.bs.toast', function() {
-        toastElement.remove();
-    });
+    // Add animation if not exists
+    if (!document.getElementById('toast-animation')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animation';
+        style.textContent = '@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }';
+        document.head.appendChild(style);
+    }
 }
 
 // ===========================
-// Smooth Scroll
+// SMOOTH SCROLL
 // ===========================
-function smoothScroll(target) {
-    document.querySelector(target).scrollIntoView({
-        behavior: 'smooth'
-    });
+function smoothScroll(targetId) {
+    const target = document.getElementById(targetId);
+    if (target) {
+        target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 }
 
 // ===========================
-// Copy to Clipboard
+// COPY TO CLIPBOARD
 // ===========================
 function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        showToast('Copied to clipboard!', 'success');
-    }, function() {
-        showToast('Failed to copy', 'error');
-    });
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('Copied to clipboard!', 'success');
+        }, function() {
+            showToast('Failed to copy', 'danger');
+        });
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showToast('Copied to clipboard!', 'success');
+        } catch (err) {
+            showToast('Failed to copy', 'danger');
+        }
+        document.body.removeChild(textArea);
+    }
 }
 
 // ===========================
-// Debounce Function
+// DEBOUNCE FUNCTION
 // ===========================
 function debounce(func, wait) {
     let timeout;
@@ -328,7 +385,46 @@ function debounce(func, wait) {
 }
 
 // ===========================
-// Console Welcome Message
+// FORMAT DATE
 // ===========================
-console.log('%c🏋️ Gym Management System v1.0.0', 'color: #667eea; font-size: 20px; font-weight: bold;');
-console.log('%cDeveloped with ❤️ for learning PHP & MySQL', 'color: #764ba2; font-size: 14px;');
+function formatDate(dateString, format = 'long') {
+    const date = new Date(dateString);
+    const options = format === 'long' 
+        ? { year: 'numeric', month: 'long', day: 'numeric' }
+        : { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+// ===========================
+// CALCULATE DAYS BETWEEN
+// ===========================
+function daysBetween(date1, date2) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    const firstDate = new Date(date1);
+    const secondDate = new Date(date2);
+    return Math.round(Math.abs((firstDate - secondDate) / oneDay));
+}
+
+// ===========================
+// ESCAPE HTML
+// ===========================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ===========================
+// GET QUERY PARAMETER
+// ===========================
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+// ===========================
+// CONSOLE WELCOME MESSAGE
+// ===========================
+console.log('%c🏋️ Gym Management System v2.0.0', 'color: #667eea; font-size: 20px; font-weight: bold;');
+console.log('%cBuilt with Pure HTML, CSS, JavaScript, PHP & MySQL', 'color: #764ba2; font-size: 14px;');
+console.log('%cNO Bootstrap - 100% Custom Code!', 'color: #28a745; font-size: 14px; font-weight: bold;');

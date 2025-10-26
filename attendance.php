@@ -1,7 +1,6 @@
 <?php
 require_once 'config.php';
 
-// Initialize variables
 $success_message = '';
 $error_message = '';
 
@@ -11,22 +10,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['check_in'])) {
     $today = date('Y-m-d');
     $current_time = date('H:i:s');
     
-    // Check if member already checked in today
     $check_query = $conn->prepare("SELECT id FROM attendance WHERE member_id = ? AND date = ?");
     $check_query->bind_param("is", $member_id, $today);
     $check_query->execute();
     $result = $check_query->get_result();
     
     if ($result->num_rows > 0) {
-        $error_message = show_error("Member has already checked in today!");
+        $error_message = "Member has already checked in today!";
     } else {
         $stmt = $conn->prepare("INSERT INTO attendance (member_id, date, check_in) VALUES (?, ?, ?)");
         $stmt->bind_param("iss", $member_id, $today, $current_time);
         
         if ($stmt->execute()) {
-            $success_message = show_success("Check-in successful at " . $current_time);
+            $success_message = "Check-in successful at " . $current_time;
         } else {
-            $error_message = show_error("Error during check-in: " . $stmt->error);
+            $error_message = "Error during check-in";
         }
         $stmt->close();
     }
@@ -42,14 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['check_out'])) {
     $stmt->bind_param("si", $current_time, $attendance_id);
     
     if ($stmt->execute()) {
-        $success_message = show_success("Check-out successful at " . $current_time);
+        $success_message = "Check-out successful at " . $current_time;
     } else {
-        $error_message = show_error("Error during check-out: " . $stmt->error);
+        $error_message = "Error during check-out";
     }
     $stmt->close();
 }
 
-// Get all active members for dropdown
+// Get active members
 $members_query = "SELECT id, name, email FROM members WHERE status = 'active' ORDER BY name ASC";
 $members_result = $conn->query($members_query);
 
@@ -70,56 +68,48 @@ $attendance_result = $conn->query($attendance_query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance - Gym System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar">
         <div class="container">
-            <a class="navbar-brand" href="index.php">
-                <i class="bi bi-gear-wide-connected"></i> Gym Management System
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php"><i class="bi bi-house-door"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="members.php"><i class="bi bi-people"></i> Members</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="attendance.php"><i class="bi bi-calendar-check"></i> Attendance</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="reports.php"><i class="bi bi-bar-chart"></i> Reports</a>
-                    </li>
-                </ul>
-            </div>
+            <a href="index.php" class="navbar-brand">🏋️ Gym Management System</a>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+            <ul class="navbar-menu" id="navMenu">
+                <li><a href="index.php">🏠 Home</a></li>
+                <li><a href="members.php">👥 Members</a></li>
+                <li><a href="attendance.php" class="active">📅 Attendance</a></li>
+                <li><a href="reports.php">📊 Reports</a></li>
+            </ul>
         </div>
     </nav>
 
     <div class="container mt-4">
         <div class="row">
             <!-- Check-in Form -->
-            <div class="col-md-4">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Member Check-in</h5>
-                    </div>
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-header">⏰ Member Check-in</div>
                     <div class="card-body">
-                        <?php if ($success_message) echo $success_message; ?>
-                        <?php if ($error_message) echo $error_message; ?>
+                        <?php if ($success_message): ?>
+                            <div class="alert alert-success">
+                                <?php echo escape_html($success_message); ?>
+                                <button class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($error_message): ?>
+                            <div class="alert alert-danger">
+                                <?php echo escape_html($error_message); ?>
+                                <button class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
+                            </div>
+                        <?php endif; ?>
                         
                         <form method="POST" action="attendance.php">
-                            <div class="mb-3">
+                            <div class="form-group">
                                 <label class="form-label">Select Member *</label>
-                                <select class="form-select" name="member_id" id="memberSelect" required>
+                                <select class="form-select" name="member_id" required>
                                     <option value="">Choose a member...</option>
                                     <?php while ($member = $members_result->fetch_assoc()): ?>
                                         <option value="<?php echo $member['id']; ?>">
@@ -127,44 +117,40 @@ $attendance_result = $conn->query($attendance_query);
                                         </option>
                                     <?php endwhile; ?>
                                 </select>
-                                <small class="text-muted">Only active members are shown</small>
+                                <small style="color: #666;">Only active members are shown</small>
                             </div>
                             
-                            <div class="mb-3">
+                            <div class="form-group">
                                 <label class="form-label">Date</label>
                                 <input type="text" class="form-control" value="<?php echo date('Y-m-d'); ?>" readonly>
                             </div>
                             
-                            <div class="mb-3">
+                            <div class="form-group">
                                 <label class="form-label">Current Time</label>
                                 <input type="text" class="form-control" id="currentTime" readonly>
                             </div>
                             
-                            <div class="d-grid">
-                                <button type="submit" name="check_in" class="btn btn-success btn-lg">
-                                    <i class="bi bi-check-circle"></i> Check In
-                                </button>
-                            </div>
+                            <button type="submit" name="check_in" class="btn btn-success btn-block btn-lg">
+                                ✅ Check In
+                            </button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Quick Stats -->
-                <div class="card shadow mt-3">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="bi bi-graph-up"></i> Today's Stats</h6>
-                    </div>
+                <div class="card mt-2">
+                    <div class="card-header info">📊 Today's Stats</div>
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex justify-between mb-1">
                             <span>Total Check-ins:</span>
-                            <span class="badge bg-primary"><?php echo $attendance_result->num_rows; ?></span>
+                            <span class="badge badge-primary"><?php echo $attendance_result->num_rows; ?></span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-between">
                             <span>Active Now:</span>
-                            <span class="badge bg-success">
+                            <span class="badge badge-success">
                                 <?php 
-                                $conn->data_seek(0);
                                 $active_count = 0;
+                                $attendance_result->data_seek(0);
                                 while ($row = $attendance_result->fetch_assoc()) {
                                     if (empty($row['check_out'])) $active_count++;
                                 }
@@ -178,16 +164,15 @@ $attendance_result = $conn->query($attendance_query);
             </div>
 
             <!-- Today's Attendance List -->
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-list-check"></i> Today's Attendance</h5>
-                        <span class="badge bg-light text-dark"><?php echo date('F d, Y'); ?></span>
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-header success">
+                        📋 Today's Attendance (<?php echo date('F d, Y'); ?>)
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-dark">
+                            <table>
+                                <thead>
                                     <tr>
                                         <th>Member Name</th>
                                         <th>Membership</th>
@@ -202,48 +187,44 @@ $attendance_result = $conn->query($attendance_query);
                                             <tr>
                                                 <td>
                                                     <strong><?php echo escape_html($attendance['name']); ?></strong><br>
-                                                    <small class="text-muted"><?php echo escape_html($attendance['email']); ?></small>
+                                                    <small style="color: #666;"><?php echo escape_html($attendance['email']); ?></small>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-info">
+                                                    <span class="badge badge-info">
                                                         <?php echo escape_html($attendance['membership_type']); ?>
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span class="time-badge badge bg-success">
-                                                        <i class="bi bi-arrow-right-circle"></i> 
-                                                        <?php echo date('g:i A', strtotime($attendance['check_in'])); ?>
+                                                    <span class="badge badge-success">
+                                                        ➡️ <?php echo date('g:i A', strtotime($attendance['check_in'])); ?>
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <?php if ($attendance['check_out']): ?>
-                                                        <span class="time-badge badge bg-danger">
-                                                            <i class="bi bi-arrow-left-circle"></i> 
-                                                            <?php echo date('g:i A', strtotime($attendance['check_out'])); ?>
+                                                        <span class="badge badge-danger">
+                                                            ⬅️ <?php echo date('g:i A', strtotime($attendance['check_out'])); ?>
                                                         </span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-warning">In Gym</span>
+                                                        <span class="badge badge-warning">In Gym</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
                                                     <?php if (!$attendance['check_out']): ?>
                                                         <form method="POST" action="attendance.php" style="display: inline;">
                                                             <input type="hidden" name="attendance_id" value="<?php echo $attendance['id']; ?>">
-                                                            <button type="submit" name="check_out" class="btn btn-sm btn-danger">
-                                                                <i class="bi bi-box-arrow-right"></i> Check Out
+                                                            <button type="submit" name="check_out" class="btn btn-danger btn-sm">
+                                                                ⬅️ Check Out
                                                             </button>
                                                         </form>
                                                     <?php else: ?>
-                                                        <span class="text-muted">Completed</span>
+                                                        <span style="color: #999;">Completed</span>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endwhile; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted">
-                                                <i class="bi bi-inbox"></i> No check-ins yet today. Start checking in members!
-                                            </td>
+                                            <td colspan="5" class="text-center">No check-ins yet today. Start checking in members!</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -255,8 +236,12 @@ $attendance_result = $conn->query($attendance_query);
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Simple Gym Management System | Built with Pure HTML, CSS, PHP & MySQL</p>
+        </div>
+    </footer>
+
     <script src="assets/js/script.js"></script>
 </body>
 </html>

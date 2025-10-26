@@ -1,27 +1,19 @@
 <?php
 require_once 'config.php';
 
-// Get date filter parameters
+// Get date filters
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 
-// Get overall statistics
-$total_members_query = "SELECT COUNT(*) as total FROM members";
-$total_members = $conn->query($total_members_query)->fetch_assoc()['total'];
+// Get statistics
+$total_members = $conn->query("SELECT COUNT(*) as total FROM members")->fetch_assoc()['total'];
+$active_members = $conn->query("SELECT COUNT(*) as total FROM members WHERE status = 'active'")->fetch_assoc()['total'];
+$total_checkins = $conn->query("SELECT COUNT(*) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'")->fetch_assoc()['total'];
 
-$active_members_query = "SELECT COUNT(*) as total FROM members WHERE status = 'active'";
-$active_members = $conn->query($active_members_query)->fetch_assoc()['total'];
-
-$total_checkins_query = "SELECT COUNT(*) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
-$total_checkins = $conn->query($total_checkins_query)->fetch_assoc()['total'];
-
-// Get member-wise attendance count
+// Member attendance
 $member_attendance_query = "
     SELECT 
-        m.id,
-        m.name, 
-        m.email,
-        m.membership_type,
+        m.id, m.name, m.email, m.membership_type,
         COUNT(a.id) as visit_count,
         MAX(a.date) as last_visit
     FROM members m
@@ -32,7 +24,7 @@ $member_attendance_query = "
 ";
 $member_attendance_result = $conn->query($member_attendance_query);
 
-// Get daily attendance summary
+// Daily summary
 $daily_summary_query = "
     SELECT 
         date,
@@ -46,12 +38,9 @@ $daily_summary_query = "
 ";
 $daily_summary_result = $conn->query($daily_summary_query);
 
-// Get top performers
+// Top performers
 $top_performers_query = "
-    SELECT 
-        m.name,
-        m.membership_type,
-        COUNT(a.id) as visit_count
+    SELECT m.name, m.membership_type, COUNT(a.id) as visit_count
     FROM members m
     JOIN attendance a ON m.id = a.member_id
     WHERE a.date BETWEEN '$start_date' AND '$end_date'
@@ -67,117 +56,89 @@ $top_performers_result = $conn->query($top_performers_query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Gym System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar">
         <div class="container">
-            <a class="navbar-brand" href="index.php">
-                <i class="bi bi-gear-wide-connected"></i> Gym Management System
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php"><i class="bi bi-house-door"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="members.php"><i class="bi bi-people"></i> Members</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="attendance.php"><i class="bi bi-calendar-check"></i> Attendance</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="reports.php"><i class="bi bi-bar-chart"></i> Reports</a>
-                    </li>
-                </ul>
-            </div>
+            <a href="index.php" class="navbar-brand">🏋️ Gym Management System</a>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+            <ul class="navbar-menu" id="navMenu">
+                <li><a href="index.php">🏠 Home</a></li>
+                <li><a href="members.php">👥 Members</a></li>
+                <li><a href="attendance.php">📅 Attendance</a></li>
+                <li><a href="reports.php" class="active">📊 Reports</a></li>
+            </ul>
         </div>
     </nav>
 
     <div class="container mt-4">
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-graph-up"></i> Attendance Reports</h2>
-        </div>
+        <h2>📈 Attendance Reports</h2>
 
         <!-- Date Filter -->
-        <div class="card shadow mb-4">
+        <div class="card mt-2">
             <div class="card-body">
-                <form method="GET" action="reports.php" class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Start Date</label>
-                        <input type="date" class="form-control" name="start_date" value="<?php echo $start_date; ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">End Date</label>
-                        <input type="date" class="form-control" name="end_date" value="<?php echo $end_date; ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary d-block w-100">
-                            <i class="bi bi-funnel"></i> Filter
-                        </button>
+                <form method="GET" action="reports.php">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" value="<?php echo $start_date; ?>">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" value="<?php echo $end_date; ?>">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary btn-block">🔍 Filter</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card stat-card blue shadow">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Members</h6>
-                            <h2 class="mb-0"><?php echo $total_members; ?></h2>
-                        </div>
-                        <i class="bi bi-people stat-icon text-primary"></i>
-                    </div>
+        <div class="row mt-2">
+            <div class="col-4">
+                <div class="stats-card">
+                    <div class="icon">👥</div>
+                    <h2><?php echo $total_members; ?></h2>
+                    <p>Total Members</p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card stat-card green shadow">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Active Members</h6>
-                            <h2 class="mb-0"><?php echo $active_members; ?></h2>
-                        </div>
-                        <i class="bi bi-person-check stat-icon text-success"></i>
-                    </div>
+            <div class="col-4">
+                <div class="stats-card">
+                    <div class="icon">✅</div>
+                    <h2><?php echo $active_members; ?></h2>
+                    <p>Active Members</p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card stat-card orange shadow">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Check-ins</h6>
-                            <h2 class="mb-0"><?php echo $total_checkins; ?></h2>
-                            <small class="text-muted"><?php echo date('M d', strtotime($start_date)) . ' - ' . date('M d, Y', strtotime($end_date)); ?></small>
-                        </div>
-                        <i class="bi bi-calendar-check stat-icon text-warning"></i>
-                    </div>
+            <div class="col-4">
+                <div class="stats-card">
+                    <div class="icon">📋</div>
+                    <h2><?php echo $total_checkins; ?></h2>
+                    <p>Total Check-ins</p>
+                    <small><?php echo date('M d', strtotime($start_date)) . ' - ' . date('M d, Y', strtotime($end_date)); ?></small>
                 </div>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row mt-2">
             <!-- Member-wise Attendance -->
-            <div class="col-md-8">
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-person-lines-fill"></i> Member Attendance Summary</h5>
-                    </div>
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-header">👤 Member Attendance Summary</div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
+                            <table>
+                                <thead>
                                     <tr>
                                         <th>Member Name</th>
                                         <th>Membership</th>
@@ -192,15 +153,15 @@ $top_performers_result = $conn->query($top_performers_query);
                                             <tr>
                                                 <td>
                                                     <strong><?php echo escape_html($member['name']); ?></strong><br>
-                                                    <small class="text-muted"><?php echo escape_html($member['email']); ?></small>
+                                                    <small style="color: #666;"><?php echo escape_html($member['email']); ?></small>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-info">
+                                                    <span class="badge badge-info">
                                                         <?php echo escape_html($member['membership_type']); ?>
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-success">
+                                                    <span class="badge badge-success">
                                                         <?php echo $member['visit_count']; ?> visits
                                                     </span>
                                                 </td>
@@ -208,19 +169,18 @@ $top_performers_result = $conn->query($top_performers_query);
                                                     <?php if ($member['last_visit']): ?>
                                                         <?php echo date('M d, Y', strtotime($member['last_visit'])); ?>
                                                     <?php else: ?>
-                                                        <span class="text-muted">No visits</span>
+                                                        <span style="color: #999;">No visits</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
                                                     <?php 
                                                     $visit_count = $member['visit_count'];
-                                                    $max_visits = 30; // Assuming monthly max
+                                                    $max_visits = 30;
                                                     $percentage = min(($visit_count / $max_visits) * 100, 100);
-                                                    $color = $percentage > 70 ? 'success' : ($percentage > 40 ? 'warning' : 'danger');
+                                                    $color_class = $percentage > 70 ? 'success' : ($percentage > 40 ? 'warning' : 'danger');
                                                     ?>
                                                     <div class="progress">
-                                                        <div class="progress-bar bg-<?php echo $color; ?>" 
-                                                             style="width: <?php echo $percentage; ?>%">
+                                                        <div class="progress-bar <?php echo $color_class; ?>" style="width: <?php echo $percentage; ?>%">
                                                             <?php echo round($percentage); ?>%
                                                         </div>
                                                     </div>
@@ -229,9 +189,7 @@ $top_performers_result = $conn->query($top_performers_query);
                                         <?php endwhile; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted">
-                                                <i class="bi bi-inbox"></i> No attendance data available
-                                            </td>
+                                            <td colspan="5" class="text-center">No attendance data available</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -242,58 +200,50 @@ $top_performers_result = $conn->query($top_performers_query);
             </div>
 
             <!-- Side Cards -->
-            <div class="col-md-4">
+            <div class="col-4">
                 <!-- Top Performers -->
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0"><i class="bi bi-trophy"></i> Top Performers</h6>
-                    </div>
+                <div class="card">
+                    <div class="card-header success">🏆 Top Performers</div>
                     <div class="card-body">
                         <?php if ($top_performers_result->num_rows > 0): ?>
-                            <div class="list-group list-group-flush">
-                                <?php $rank = 1; ?>
-                                <?php while ($performer = $top_performers_result->fetch_assoc()): ?>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                        <div>
-                                            <span class="badge bg-warning text-dark me-2">#<?php echo $rank++; ?></span>
-                                            <strong><?php echo escape_html($performer['name']); ?></strong>
-                                            <br><small class="text-muted"><?php echo escape_html($performer['membership_type']); ?></small>
-                                        </div>
-                                        <span class="badge bg-primary rounded-pill">
-                                            <?php echo $performer['visit_count']; ?> visits
-                                        </span>
+                            <?php $rank = 1; ?>
+                            <?php while ($performer = $top_performers_result->fetch_assoc()): ?>
+                                <div style="padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <span class="badge badge-warning">#<?php echo $rank++; ?></span>
+                                        <strong><?php echo escape_html($performer['name']); ?></strong>
+                                        <br><small style="color: #666;"><?php echo escape_html($performer['membership_type']); ?></small>
                                     </div>
-                                <?php endwhile; ?>
-                            </div>
+                                    <span class="badge badge-primary">
+                                        <?php echo $performer['visit_count']; ?> visits
+                                    </span>
+                                </div>
+                            <?php endwhile; ?>
                         <?php else: ?>
-                            <p class="text-muted mb-0">No data available</p>
+                            <p style="color: #999;">No data available</p>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Daily Summary -->
-                <div class="card shadow">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="bi bi-calendar-week"></i> Daily Summary (Last 10 Days)</h6>
-                    </div>
+                <div class="card mt-2">
+                    <div class="card-header info">📅 Daily Summary (Last 10 Days)</div>
                     <div class="card-body">
                         <?php if ($daily_summary_result->num_rows > 0): ?>
-                            <div class="list-group list-group-flush">
-                                <?php while ($day = $daily_summary_result->fetch_assoc()): ?>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                        <div>
-                                            <strong><?php echo date('M d, Y', strtotime($day['date'])); ?></strong>
-                                            <br><small class="text-muted"><?php echo date('l', strtotime($day['date'])); ?></small>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="badge bg-success"><?php echo $day['total_checkins']; ?> check-ins</span>
-                                            <br><small class="text-muted"><?php echo $day['completed_visits']; ?> completed</small>
-                                        </div>
+                            <?php while ($day = $daily_summary_result->fetch_assoc()): ?>
+                                <div style="padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong><?php echo date('M d, Y', strtotime($day['date'])); ?></strong>
+                                        <br><small style="color: #666;"><?php echo date('l', strtotime($day['date'])); ?></small>
                                     </div>
-                                <?php endwhile; ?>
-                            </div>
+                                    <div style="text-align: right;">
+                                        <span class="badge badge-success"><?php echo $day['total_checkins']; ?> check-ins</span>
+                                        <br><small style="color: #666;"><?php echo $day['completed_visits']; ?> completed</small>
+                                    </div>
+                                </div>
+                            <?php endwhile; ?>
                         <?php else: ?>
-                            <p class="text-muted mb-0">No data available</p>
+                            <p style="color: #999;">No data available</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -301,8 +251,12 @@ $top_performers_result = $conn->query($top_performers_query);
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Simple Gym Management System | Built with Pure HTML, CSS, PHP & MySQL</p>
+        </div>
+    </footer>
+
     <script src="assets/js/script.js"></script>
 </body>
 </html>
