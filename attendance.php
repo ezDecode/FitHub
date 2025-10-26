@@ -72,11 +72,8 @@ $attendance_result = $conn->query($attendance_query);
     <title>Attendance - Gym System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; }
-        .time-badge { font-size: 1rem; padding: 8px 12px; }
-        .search-box { margin-bottom: 20px; }
-    </style>
+    <!-- Custom CSS -->
+    <link href="assets/css/style.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -259,15 +256,7 @@ $attendance_result = $conn->query($attendance_query);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Update current time every second
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('currentTime').value = timeString;
-        }
-        updateTime();
-        setInterval(updateTime, 1000);
-    </script>
+    <!-- Custom JavaScript -->
+    <script src="assets/js/script.js"></script>
 </body>
 </html>

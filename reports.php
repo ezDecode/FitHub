@@ -69,22 +69,8 @@ $top_performers_result = $conn->query($top_performers_query);
     <title>Reports - Gym System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; }
-        .stat-card {
-            border-left: 4px solid;
-            transition: transform 0.2s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .stat-card.blue { border-left-color: #007bff; }
-        .stat-card.green { border-left-color: #28a745; }
-        .stat-card.orange { border-left-color: #fd7e14; }
-        .stat-icon { font-size: 2.5rem; opacity: 0.3; }
-        .progress { height: 25px; }
-    </style>
+    <!-- Custom CSS -->
+    <link href="assets/css/style.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -316,5 +302,7 @@ $top_performers_result = $conn->query($top_performers_query);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="assets/js/script.js"></script>
 </body>
 </html>
