@@ -1,0 +1,50 @@
+/* ===========================
+   FitHub - Font Configuration
+   =========================== */
+
+/* Google Fonts Import - Inter Tight */
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Font Family Variables */
+:root {
+    --font-family-primary: 'Inter Tight', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-family-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Base Font Application */
+body,
+input,
+textarea,
+select,
+button {
+    font-family: var(--font-family-primary);
+}
+
+/* Font Weight Utilities */
+.font-light {
+    font-weight: 300;
+}
+
+.font-regular {
+    font-weight: 400;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.font-extrabold {
+    font-weight: 800;
+}
+
+.font-black {
+    font-weight: 900;
+}

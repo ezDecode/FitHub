@@ -1,0 +1,131 @@
+/* ===========================
+   TABLE STYLES
+   =========================== */
+
+.table-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    margin-bottom: var(--space-8);
+}
+
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6);
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.table-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: 1.188rem;
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    text-transform: uppercase;
+}
+
+.table-count {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    font-size: 0.938rem;
+    font-weight: var(--font-medium);
+    color: var(--white);
+    text-transform: uppercase;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.938rem;
+}
+
+.table th {
+    padding: var(--space-4);
+    text-align: left;
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    font-size: 0.813rem;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table td {
+    padding: var(--space-4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--gray-200);
+    font-weight: var(--font-normal);
+}
+
+.table tbody tr {
+    transition: all var(--transition-base);
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Member Info Styles */
+.member-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.member-name {
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    font-size: 1.063rem;
+}
+
+.member-detail {
+    font-size: 0.813rem;
+    color: var(--gray-400);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.contact-email {
+    color: var(--gray-200);
+    font-size: 0.938rem;
+}
+
+.contact-phone {
+    color: var(--gray-400);
+    font-size: 0.813rem;
+}
+
+/* Time and Duration Info */
+.time-info {
+    font-size: 0.938rem;
+    color: var(--gray-200);
+    font-weight: var(--font-medium);
+}
+
+.duration-info {
+    font-size: 0.938rem;
+    color: var(--gray-200);
+    font-weight: var(--font-medium);
+}

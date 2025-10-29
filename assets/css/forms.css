@@ -1,0 +1,354 @@
+/* ===========================
+   FORM STYLES
+   =========================== */
+
+.form-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-header-icon {
+    font-size: var(--text-xl);
+}
+
+.form-header-title {
+    font-size: 1.188rem;
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    text-transform: uppercase;
+}
+
+.member-form,
+.checkin-form,
+.filter-form,
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-6);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.form-label {
+    font-size: 0.938rem;
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    text-transform: uppercase;
+}
+
+.form-control,
+input.form-control,
+textarea.form-control {
+    padding: var(--space-3) var(--space-4);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    color: var(--white);
+    font-size: 1.063rem;
+    font-weight: var(--font-normal);
+    transition: all var(--transition-base);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    font-family: inherit;
+}
+
+.form-control:focus,
+input.form-control:focus,
+textarea.form-control:focus {
+    outline: none;
+    border-color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    transform: scale(1.015);
+}
+
+.form-control::placeholder {
+    color: var(--gray-500);
+    font-weight: var(--font-normal);
+}
+
+/* Custom Select Dropdown Styles */
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 6L11 1' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px 8px;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    font-family: inherit;
+}
+
+select.form-control:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+select.form-control:focus,
+select.form-control:active {
+    outline: none;
+    border-color: var(--white);
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Select Options Styling */
+select.form-control option {
+    background: #0a0a0a;
+    color: var(--white);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: var(--font-normal);
+    border: none;
+}
+
+select.form-control option:hover,
+select.form-control option:focus {
+    background: #1a1a1a;
+    color: var(--white);
+}
+
+select.form-control option:checked {
+    background: #2a2a2a;
+    color: var(--white);
+    font-weight: var(--font-medium);
+}
+
+select.form-control option:disabled {
+    color: var(--gray-500);
+    background: #050505;
+}
+
+/* Remove default select styling in all browsers */
+select::-ms-expand {
+    display: none;
+}
+
+/* Date input custom styling */
+input[type="date"].form-control {
+    position: relative;
+    padding-right: var(--space-4);
+}
+
+input[type="date"].form-control::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    filter: invert(1);
+    opacity: 0.7;
+}
+
+input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Custom Select Wrapper for more control */
+.select-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* Removed duplicate arrow - using background-image instead */
+
+.form-actions {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    margin-top: var(--space-4);
+}
+
+.action-buttons {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--white);
+    cursor: pointer;
+}
+
+.checkbox-label {
+    font-size: 1.063rem;
+    font-weight: var(--font-medium);
+    color: var(--white);
+    cursor: pointer;
+}
+
+/* Enhanced Input States */
+input.form-control:read-only {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: var(--gray-400);
+    cursor: not-allowed;
+}
+
+input.form-control:disabled,
+select.form-control:disabled {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: var(--gray-500);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Input with icons */
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .form-control {
+    padding-left: calc(var(--space-4) * 2 + 20px);
+}
+
+.input-icon {
+    position: absolute;
+    left: var(--space-4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+    font-size: 1.25rem;
+}
+
+/* Login Specific Styles */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--black);
+    padding: var(--space-4);
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-10);
+    max-width: 450px;
+    width: 100%;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    margin-bottom: var(--space-6);
+}
+
+.login-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    margin-bottom: var(--space-3);
+}
+
+.login-subtitle {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+}
+
+/* Error Container */
+.error-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--black);
+    padding: var(--space-4);
+}
+
+.error-content {
+    text-align: center;
+    max-width: 500px;
+}
+
+.error-icon {
+    font-size: var(--text-6xl);
+    margin-bottom: var(--space-6);
+}
+
+.error-code {
+    font-size: var(--text-6xl);
+    font-weight: var(--font-semibold);
+    color: var(--white);
+    margin-bottom: var(--space-4);
+    line-height: 1;
+}
+
+.error-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-300);
+    margin-bottom: var(--space-4);
+}
+
+.error-description {
+    font-size: var(--text-lg);
+    color: var(--gray-400);
+    margin-bottom: var(--space-8);
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: center;
+    flex-wrap: wrap;
+}

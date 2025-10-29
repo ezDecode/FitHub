@@ -1,275 +1,368 @@
 <?php
+session_start();
 require_once 'config.php';
 
-// Initialize variables
-$success_message = '';
-$error_message = '';
-$edit_member = null;
+// Check if user is logged in
+if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
+    header('Location: login.php');
+    exit;
+}
+
+$message = '';
+$message_type = '';
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['action'])) {
-        $name = trim($_POST['name']);
-        $email = trim($_POST['email']);
-        $phone = trim($_POST['phone']);
-        $membership_type = trim($_POST['membership_type']);
-        $join_date = trim($_POST['join_date']);
-        $status = isset($_POST['status']) ? $_POST['status'] : 'active';
-
-        // Validation
-        $errors = [];
-        if (empty($name)) $errors[] = "Name is required";
-        if (empty($email) || !validate_email($email)) $errors[] = "Valid email is required";
-        if (empty($phone) || !validate_phone($phone)) $errors[] = "Valid 10-digit phone number is required";
-        if (empty($membership_type)) $errors[] = "Membership type is required";
-        if (empty($join_date)) $errors[] = "Join date is required";
-
-        if (empty($errors)) {
-            if ($_POST['action'] == 'add') {
-                $check_email = $conn->prepare("SELECT id FROM members WHERE email = ?");
-                $check_email->bind_param("s", $email);
-                $check_email->execute();
-                $result = $check_email->get_result();
-                
-                if ($result->num_rows > 0) {
-                    $error_message = "Email already exists!";
-                } else {
-                    $stmt = $conn->prepare("INSERT INTO members (name, email, phone, join_date, membership_type, status) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("ssssss", $name, $email, $phone, $join_date, $membership_type, $status);
-                    
-                    if ($stmt->execute()) {
-                        $success_message = "Member added successfully!";
-                    } else {
-                        $error_message = "Error adding member";
-                    }
-                    $stmt->close();
-                }
-                $check_email->close();
-            } elseif ($_POST['action'] == 'edit') {
-                $id = $_POST['id'];
-                $stmt = $conn->prepare("UPDATE members SET name = ?, email = ?, phone = ?, join_date = ?, membership_type = ?, status = ? WHERE id = ?");
-                $stmt->bind_param("ssssssi", $name, $email, $phone, $join_date, $membership_type, $status, $id);
-                
-                if ($stmt->execute()) {
-                    $success_message = "Member updated successfully!";
-                } else {
-                    $error_message = "Error updating member";
-                }
-                $stmt->close();
-            }
+if ($_POST) {
+    if (isset($_POST['add_member'])) {
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $phone = $_POST['phone'];
+        $join_date = $_POST['join_date'];
+        $membership_type = $_POST['membership_type'];
+        $status = $_POST['status'];
+        
+        $stmt = $conn->prepare("INSERT INTO members (name, email, phone, join_date, membership_type, status) VALUES (?, ?, ?, ?, ?, ?)");
+        if ($stmt->bind_param("ssssss", $name, $email, $phone, $join_date, $membership_type, $status) && $stmt->execute()) {
+            $message = "Member added successfully!";
+            $message_type = "success";
         } else {
-            $error_message = implode("<br>", $errors);
+            $message = "Error adding member!";
+            $message_type = "danger";
+        }
+    }
+    
+    if (isset($_POST['update_member'])) {
+        $id = $_POST['member_id'];
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $phone = $_POST['phone'];
+        $join_date = $_POST['join_date'];
+        $membership_type = $_POST['membership_type'];
+        $status = $_POST['status'];
+        
+        $stmt = $conn->prepare("UPDATE members SET name=?, email=?, phone=?, join_date=?, membership_type=?, status=? WHERE id=?");
+        if ($stmt->bind_param("ssssssi", $name, $email, $phone, $join_date, $membership_type, $status, $id) && $stmt->execute()) {
+            $message = "Member updated successfully!";
+            $message_type = "success";
+        } else {
+            $message = "Error updating member!";
+            $message_type = "danger";
+        }
+    }
+    
+    if (isset($_POST['delete_member'])) {
+        $id = $_POST['member_id'];
+        $stmt = $conn->prepare("DELETE FROM members WHERE id=?");
+        if ($stmt->bind_param("i", $id) && $stmt->execute()) {
+            $message = "Member deleted successfully!";
+            $message_type = "success";
+        } else {
+            $message = "Error deleting member!";
+            $message_type = "danger";
         }
     }
 }
 
-// Handle delete
-if (isset($_GET['delete'])) {
-    $id = intval($_GET['delete']);
-    $stmt = $conn->prepare("DELETE FROM members WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    
-    if ($stmt->execute()) {
-        $success_message = "Member deleted successfully!";
-    } else {
-        $error_message = "Error deleting member";
-    }
-    $stmt->close();
-}
-
-// Get member for editing
+// Handle edit
+$edit_member = null;
 if (isset($_GET['edit'])) {
-    $id = intval($_GET['edit']);
-    $stmt = $conn->prepare("SELECT * FROM members WHERE id = ?");
+    $id = $_GET['edit'];
+    $stmt = $conn->prepare("SELECT * FROM members WHERE id=?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
     $edit_member = $result->fetch_assoc();
-    $stmt->close();
 }
 
-// Get all members
-$members_query = "SELECT * FROM members ORDER BY id DESC";
-$members_result = $conn->query($members_query);
+// Fetch all members
+$result = $conn->query("SELECT * FROM members ORDER BY name");
+$members = [];
+while ($row = $result->fetch_assoc()) {
+    $members[] = $row;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Manage gym members - Add, edit, and view member information">
-    <meta name="theme-color" content="#667eea">
-    <title>Members Management - Gym System</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members - FitHub Gym Management</title>
+    <link rel="stylesheet" href="assets/css/fonts.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/style.css?v=3.3">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Modern Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.php" class="navbar-brand">🏋️ Gym Management System</a>
-            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
-            <ul class="navbar-menu" id="navMenu">
-                <li><a href="index.php">🏠 Home</a></li>
-                <li><a href="members.php" class="active">👥 Members</a></li>
-                <li><a href="attendance.php">📅 Attendance</a></li>
-                <li><a href="reports.php">📊 Reports</a></li>
+            <a href="index.php" class="navbar-brand">
+                <span class="material-symbols-rounded brand-icon">fitness_center</span>
+                <span class="brand-text">FitHub</span>
+            </a>
+            <button class="navbar-toggle" id="navbarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="navbar-menu" id="navbarMenu">
+                <li><a href="index.php">Dashboard</a></li>
+                <li><a href="members.php" class="active">Members</a></li>
+                <li><a href="attendance.php">Attendance</a></li>
+                <li><a href="reports.php">Analytics</a></li>
+                <li><a href="logout.php" class="logout-btn">Logout</a></li>
             </ul>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Add/Edit Member Form -->
-            <div class="col-12 col-4">
-                <div class="card">
-                    <div class="card-header">
-                        <?php echo $edit_member ? '✏️ Edit Member' : '➕ Add New Member'; ?>
-                    </div>
-                    <div class="card-body">
-                        <?php if ($success_message): ?>
-                            <div class="alert alert-success">
-                                <?php echo escape_html($success_message); ?>
-                                <button class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if ($error_message): ?>
-                            <div class="alert alert-danger">
-                                <?php echo escape_html($error_message); ?>
-                                <button class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <form method="POST" action="members.php">
-                            <input type="hidden" name="action" value="<?php echo $edit_member ? 'edit' : 'add'; ?>">
-                            <?php if ($edit_member): ?>
-                                <input type="hidden" name="id" value="<?php echo $edit_member['id']; ?>">
-                            <?php endif; ?>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Name *</label>
-                                <input type="text" class="form-control" name="name" 
-                                       value="<?php echo $edit_member ? escape_html($edit_member['name']) : ''; ?>" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Email *</label>
-                                <input type="email" class="form-control" name="email" 
-                                       value="<?php echo $edit_member ? escape_html($edit_member['email']) : ''; ?>" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Phone (10 digits) *</label>
-                                <input type="text" class="form-control" name="phone" 
-                                       pattern="[0-9]{10}" maxlength="10"
-                                       value="<?php echo $edit_member ? escape_html($edit_member['phone']) : ''; ?>" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Join Date *</label>
-                                <input type="date" class="form-control" name="join_date" 
-                                       value="<?php echo $edit_member ? $edit_member['join_date'] : date('Y-m-d'); ?>" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Membership Type *</label>
-                                <select class="form-select" name="membership_type" required>
-                                    <option value="">Select Type</option>
-                                    <option value="Monthly" <?php echo ($edit_member && $edit_member['membership_type'] == 'Monthly') ? 'selected' : ''; ?>>Monthly</option>
-                                    <option value="Quarterly" <?php echo ($edit_member && $edit_member['membership_type'] == 'Quarterly') ? 'selected' : ''; ?>>Quarterly</option>
-                                    <option value="Yearly" <?php echo ($edit_member && $edit_member['membership_type'] == 'Yearly') ? 'selected' : ''; ?>>Yearly</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" name="status">
-                                    <option value="active" <?php echo ($edit_member && $edit_member['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
-                                    <option value="inactive" <?php echo ($edit_member && $edit_member['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <?php echo $edit_member ? '💾 Update Member' : '➕ Add Member'; ?>
-                            </button>
-                            
-                            <?php if ($edit_member): ?>
-                                <a href="members.php" class="btn btn-secondary btn-block mt-1">❌ Cancel</a>
-                            <?php endif; ?>
-                        </form>
-                    </div>
-                </div>
-            </div>
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1 class="page-title">Members</h1>
+            <p class="page-subtitle">Manage your gym members with comprehensive profiles and membership tracking.</p>
+        </div>
+    </section>
 
-            <!-- Members List -->
-            <div class="col-12 col-8">
-                <div class="card">
-                    <div class="card-header success">
-                        👥 Members List (Total: <?php echo $members_result->num_rows; ?>)
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>Membership</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if ($members_result->num_rows > 0): ?>
-                                        <?php while ($member = $members_result->fetch_assoc()): ?>
-                                            <tr>
-                                                <td><?php echo $member['id']; ?></td>
-                                                <td><?php echo escape_html($member['name']); ?></td>
-                                                <td><?php echo escape_html($member['email']); ?></td>
-                                                <td><?php echo escape_html($member['phone']); ?></td>
-                                                <td>
-                                                    <span class="badge badge-info">
-                                                        <?php echo escape_html($member['membership_type']); ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?php if ($member['status'] == 'active'): ?>
-                                                        <span class="badge badge-success">Active</span>
-                                                    <?php else: ?>
-                                                        <span class="badge badge-danger">Inactive</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <a href="members.php?edit=<?php echo $member['id']; ?>" 
-                                                       class="btn btn-warning btn-sm">✏️ Edit</a>
-                                                    <a href="members.php?delete=<?php echo $member['id']; ?>" 
-                                                       class="btn btn-danger btn-sm" 
-                                                       onclick="return confirm('Delete this member?');">🗑️ Delete</a>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="7" class="text-center">No members found. Add your first member!</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Add/Edit Member Form -->
+            <div class="form-container" id="memberFormContainer" style="display: none;">
+                <div class="form-header">
+                    <span class="material-symbols-rounded form-header-icon"><?php echo $edit_member ? 'edit' : 'person_add'; ?></span>
+                    <h2 class="form-header-title"><?php echo $edit_member ? 'Edit Member' : 'Add New Member'; ?></h2>
+                </div>
+                
+                <form method="POST" class="member-form">
+                    <?php if ($edit_member): ?>
+                        <input type="hidden" name="member_id" value="<?php echo $edit_member['id']; ?>">
+                    <?php endif; ?>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Full Name *</label>
+                            <input type="text" id="name" name="name" class="form-control" 
+                                   value="<?php echo $edit_member ? $edit_member['name'] : ''; ?>" 
+                                   placeholder="Enter member's full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   value="<?php echo $edit_member ? $edit_member['email'] : ''; ?>" 
+                                   placeholder="member@example.com" required>
                         </div>
                     </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" class="form-control" 
+                                   value="<?php echo $edit_member ? $edit_member['phone'] : ''; ?>" 
+                                   placeholder="10-digit phone number" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="join_date" class="form-label">Join Date *</label>
+                            <input type="date" id="join_date" name="join_date" class="form-control" 
+                                   value="<?php echo $edit_member ? $edit_member['join_date'] : date('Y-m-d'); ?>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="membership_type" class="form-label">Membership Type *</label>
+                            <select id="membership_type" name="membership_type" class="form-control" required>
+                                <option value="">Select membership type</option>
+                                <option value="Monthly" <?php echo ($edit_member && $edit_member['membership_type'] == 'Monthly') ? 'selected' : ''; ?>>Monthly</option>
+                                <option value="Quarterly" <?php echo ($edit_member && $edit_member['membership_type'] == 'Quarterly') ? 'selected' : ''; ?>>Quarterly</option>
+                                <option value="Yearly" <?php echo ($edit_member && $edit_member['membership_type'] == 'Yearly') ? 'selected' : ''; ?>>Yearly</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="status" class="form-label">Status</label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="active" <?php echo (!$edit_member || $edit_member['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
+                                <option value="inactive" <?php echo ($edit_member && $edit_member['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" name="<?php echo $edit_member ? 'update_member' : 'add_member'; ?>" class="btn btn-primary">
+                            <span><?php echo $edit_member ? ' Update Member' : ' Add Member'; ?></span>
+                        </button>
+                        <?php if ($edit_member): ?>
+                            <a href="members.php" class="btn btn-secondary">
+                                <span>Cancel</span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Members Directory -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">
+                        <span></span>
+                        Members Directory
+                    </div>
+                    <div style="display: flex; gap: var(--space-3); align-items: center;">
+                        <button type="button" class="btn btn-primary" id="toggleFormBtn" onclick="toggleMemberForm()">
+                            <span class="material-symbols-rounded">person_add</span>
+                            <span>Add New Member</span>
+                        </button>
+                        <div class="table-count"><?php echo count($members); ?> Total</div>
+                    </div>
                 </div>
+                
+                <?php if (count($members) > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Contact Information</th>
+                                    <th>Membership</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($members as $member): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="member-info">
+                                                <div class="member-name"><?php echo htmlspecialchars($member['name']); ?></div>
+                                                <div class="member-detail">Joined: <?php echo date('M j, Y', strtotime($member['join_date'])); ?></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="contact-info">
+                                                <div class="contact-email"><?php echo htmlspecialchars($member['email']); ?></div>
+                                                <div class="contact-phone"><?php echo htmlspecialchars($member['phone']); ?></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-primary"><?php echo htmlspecialchars($member['membership_type']); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-<?php echo $member['status'] == 'active' ? 'success' : 'warning'; ?>">
+                                                <?php echo ucfirst($member['status']); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <a href="?edit=<?php echo $member['id']; ?>" class="btn btn-sm btn-secondary">
+                                                    <span>Edit</span>
+                                                </a>
+                                                <form method="POST" style="display: inline;" data-confirm="Are you sure you want to delete this member?" data-member-name="<?php echo htmlspecialchars($member['name']); ?>">
+                                                    <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
+                                                    <button type="submit" name="delete_member" class="btn btn-sm btn-danger">
+                                                        <span>Delete</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <span class="material-symbols-rounded empty-state-icon">group_off</span>
+                        <h3 class="empty-state-title">No Members Found</h3>
+                        <p class="empty-state-description">Start building your gym community by adding your first member.</p>
+                        <a href="#add-member" class="btn btn-primary">
+                            <span>Add First Member</span>
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
-    </div>
+    </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Simple Gym Management System | Built with Pure HTML, CSS, PHP & MySQL</p>
-        </div>
-    </footer>
-
+    <!-- Footer -->
+    <?php include 'includes/footer.php'; ?>
+    
     <script src="assets/js/script.js"></script>
+    <script>
+        // Mobile navigation toggle
+        document.getElementById('navbarToggle').addEventListener('click', function() {
+            const menu = document.getElementById('navbarMenu');
+            menu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.navbar-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navbarMenu').classList.remove('active');
+            });
+        });
+
+        // Show toast notifications for PHP messages
+        <?php if ($message): ?>
+            showToast('<?php echo addslashes($message); ?>', '<?php echo $message_type === 'success' ? 'success' : 'error'; ?>', '<?php echo $message_type === 'success' ? 'Success' : 'Error'; ?>');
+        <?php endif; ?>
+
+        // Toggle member form visibility
+        function toggleMemberForm() {
+            const formContainer = document.getElementById('memberFormContainer');
+            const toggleBtn = document.getElementById('toggleFormBtn');
+            
+            if (formContainer.style.display === 'none') {
+                formContainer.style.display = 'block';
+                formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toggleBtn.innerHTML = '<span class="material-symbols-rounded">close</span><span>Cancel</span>';
+                toggleBtn.classList.remove('btn-primary');
+                toggleBtn.classList.add('btn-secondary');
+            } else {
+                formContainer.style.display = 'none';
+                toggleBtn.innerHTML = '<span class="material-symbols-rounded">person_add</span><span>Add New Member</span>';
+                toggleBtn.classList.remove('btn-secondary');
+                toggleBtn.classList.add('btn-primary');
+            }
+        }
+
+        // Show form if editing
+        <?php if ($edit_member): ?>
+            document.getElementById('memberFormContainer').style.display = 'block';
+            document.getElementById('toggleFormBtn').innerHTML = '<span class="material-symbols-rounded">close</span><span>Cancel</span>';
+            document.getElementById('toggleFormBtn').classList.remove('btn-primary');
+            document.getElementById('toggleFormBtn').classList.add('btn-secondary');
+        <?php endif; ?>
+
+        // Form validation
+        document.querySelector('.member-form').addEventListener('submit', function(e) {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            if (!name || !email || !phone) {
+                e.preventDefault();
+                showToast('Please fill in all required fields.', 'error', 'Validation Error');
+                return false;
+            }
+            
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                showToast('Please enter a valid email address.', 'error', 'Validation Error');
+                return false;
+            }
+            
+            // Basic phone validation
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                e.preventDefault();
+                showToast('Please enter a valid 10-digit phone number.', 'error', 'Validation Error');
+                return false;
+            }
+        });
+    </script>
 </body>
 </html>
