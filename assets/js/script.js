@@ -337,6 +337,16 @@ function confirmDelete() {
         // Show loading toast
         showToast('Deleting member...', 'info', 'Deleting');
         
+        // Ensure the server receives the delete flag when submitting programmatically
+        // Because form.submit() does not include the clicked submitter's name/value
+        if (!formToSubmit.querySelector('input[name="delete_member"]')) {
+            const hiddenDeleteFlag = document.createElement('input');
+            hiddenDeleteFlag.type = 'hidden';
+            hiddenDeleteFlag.name = 'delete_member';
+            hiddenDeleteFlag.value = '1';
+            formToSubmit.appendChild(hiddenDeleteFlag);
+        }
+
         // Submit the form using stored reference
         formToSubmit.submit();
     }

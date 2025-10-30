@@ -180,14 +180,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                             <input type="text" id="today_date" class="form-control" readonly
                                 value="<?php echo date('F j, Y'); ?>">
                         </div>
-                        <div class="form-group">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="check_in_confirm" name="check_in_confirm" required>
-                                <label for="check_in_confirm" class="checkbox-label">
-                                    <span class="material-symbols-rounded">check_circle</span> Check In Member
-                                </label>
-                            </div>
-                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" name="check_in" class="btn btn-primary">
@@ -408,17 +400,9 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
     if (checkinForm) {
         checkinForm.addEventListener('submit', function(e) {
             const memberId = document.getElementById('member_id').value;
-            const confirmCheckbox = document.getElementById('check_in_confirm');
-
             if (!memberId) {
                 e.preventDefault();
                 alert('Please select a member to check in.');
-                return false;
-            }
-
-            if (!confirmCheckbox.checked) {
-                e.preventDefault();
-                alert('Please confirm the check-in by checking the checkbox.');
                 return false;
             }
         });

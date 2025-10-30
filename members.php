@@ -21,13 +21,46 @@ if ($_POST) {
         $membership_type = $_POST['membership_type'];
         $status = $_POST['status'];
         
-        $stmt = $conn->prepare("INSERT INTO members (name, email, phone, join_date, membership_type, status) VALUES (?, ?, ?, ?, ?, ?)");
-        if ($stmt->bind_param("ssssss", $name, $email, $phone, $join_date, $membership_type, $status) && $stmt->execute()) {
-            $message = "Member added successfully!";
-            $message_type = "success";
-        } else {
-            $message = "Error adding member!";
+        // Pre-check duplicates for friendly errors
+        $dup = $conn->prepare("SELECT id FROM members WHERE email=? LIMIT 1");
+        $dup->bind_param("s", $email);
+        $dup->execute();
+        $dup->store_result();
+        if ($dup->num_rows > 0) {
+            $message = "A member with this email already exists.";
             $message_type = "danger";
+            $dup->close();
+        } else {
+            $dup->close();
+            // Check same person (name + phone)
+            $dup2 = $conn->prepare("SELECT id FROM members WHERE name=? AND phone=? LIMIT 1");
+            $dup2->bind_param("ss", $name, $phone);
+            $dup2->execute();
+            $dup2->store_result();
+            if ($dup2->num_rows > 0) {
+                $message = "Member already exists with the same name and phone.";
+                $message_type = "danger";
+                $dup2->close();
+            } else {
+                $dup2->close();
+                try {
+                    $stmt = $conn->prepare("INSERT INTO members (name, email, phone, join_date, membership_type, status) VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("ssssss", $name, $email, $phone, $join_date, $membership_type, $status);
+                    $stmt->execute();
+                    $message = "Member added successfully!";
+                    $message_type = "success";
+                } catch (mysqli_sql_exception $e) {
+                    if ($e->getCode() === 1062) { // duplicate key safety
+                        $message = "A member with this email already exists.";
+                        $message_type = "danger";
+                    } else {
+                        $message = "Error adding member: " . $e->getMessage();
+                        $message_type = "danger";
+                    }
+                } finally {
+                    if (isset($stmt) && $stmt instanceof mysqli_stmt) { $stmt->close(); }
+                }
+            }
         }
     }
     
@@ -40,13 +73,45 @@ if ($_POST) {
         $membership_type = $_POST['membership_type'];
         $status = $_POST['status'];
         
-        $stmt = $conn->prepare("UPDATE members SET name=?, email=?, phone=?, join_date=?, membership_type=?, status=? WHERE id=?");
-        if ($stmt->bind_param("ssssssi", $name, $email, $phone, $join_date, $membership_type, $status, $id) && $stmt->execute()) {
-            $message = "Member updated successfully!";
-            $message_type = "success";
-        } else {
-            $message = "Error updating member!";
+        // Pre-check duplicates
+        $dup = $conn->prepare("SELECT id FROM members WHERE email=? AND id<>? LIMIT 1");
+        $dup->bind_param("si", $email, $id);
+        $dup->execute();
+        $dup->store_result();
+        if ($dup->num_rows > 0) {
+            $message = "Email already in use by another member.";
             $message_type = "danger";
+            $dup->close();
+        } else {
+            $dup->close();
+            $dup2 = $conn->prepare("SELECT id FROM members WHERE name=? AND phone=? AND id<>? LIMIT 1");
+            $dup2->bind_param("ssi", $name, $phone, $id);
+            $dup2->execute();
+            $dup2->store_result();
+            if ($dup2->num_rows > 0) {
+                $message = "Another member already exists with the same name and phone.";
+                $message_type = "danger";
+                $dup2->close();
+            } else {
+                $dup2->close();
+                try {
+                    $stmt = $conn->prepare("UPDATE members SET name=?, email=?, phone=?, join_date=?, membership_type=?, status=? WHERE id=?");
+                    $stmt->bind_param("ssssssi", $name, $email, $phone, $join_date, $membership_type, $status, $id);
+                    $stmt->execute();
+                    $message = "Member updated successfully!";
+                    $message_type = "success";
+                } catch (mysqli_sql_exception $e) {
+                    if ($e->getCode() === 1062) {
+                        $message = "Email already in use by another member.";
+                        $message_type = "danger";
+                    } else {
+                        $message = "Error updating member: " . $e->getMessage();
+                        $message_type = "danger";
+                    }
+                } finally {
+                    if (isset($stmt) && $stmt instanceof mysqli_stmt) { $stmt->close(); }
+                }
+            }
         }
     }
     
