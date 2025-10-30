@@ -281,7 +281,7 @@ function showDeleteModal(message, memberName, form) {
                 <p class="modal-text">
                     ${message}<br><br>
                     <strong style="color: var(--white);">Member: ${memberName}</strong><br><br>
-                    This action cannot be undone. All associated attendance records will remain in the system.
+                    This action cannot be undone. All associated attendance records will be deleted permanently.
                 </p>
             </div>
             <div class="modal-footer">
@@ -328,13 +328,17 @@ function closeDeleteModal() {
 
 function confirmDelete() {
     if (window.pendingDeleteForm) {
+        // Store form reference before closing modal
+        const formToSubmit = window.pendingDeleteForm;
+        
+        // Close modal
         closeDeleteModal();
         
         // Show loading toast
         showToast('Deleting member...', 'info', 'Deleting');
         
-        // Submit the form
-        window.pendingDeleteForm.submit();
+        // Submit the form using stored reference
+        formToSubmit.submit();
     }
 }
 

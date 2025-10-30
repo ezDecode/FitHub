@@ -86,24 +86,33 @@ while ($row = $result->fetch_assoc()) {
         </div>
     </nav>
     
-    <!-- Page Header -->
-    <section class="page-header">
-        <div class="container">
-            <h1 class="page-title">Analytics</h1>
-            <p class="page-subtitle">Analyze attendance patterns, member engagement, and gym performance metrics.</p>
-        </div>
-    </section>
-    
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Filter Reports -->
-            <div class="form-container">
-                <div class="form-header">
-                    <span class="material-symbols-rounded form-header-icon">analytics</span>
-                    <h2 class="form-header-title">Filter Reports</h2>
+            <!-- Reports Header -->
+            <div class="reports-header-bar">
+                <div class="reports-header-content">
+                    <h2 class="page-section-title">Analytics & Reports</h2>
+                    <p class="page-section-subtitle">Comprehensive insights into your gym performance</p>
                 </div>
-                <form method="GET" class="filter-form">
+                <div class="reports-date-range">
+                    <span class="material-symbols-rounded">date_range</span>
+                    <span><?php echo date('M j', strtotime($start_date)); ?> - <?php echo date('M j, Y', strtotime($end_date)); ?></span>
+                </div>
+            </div>
+
+            <!-- Filter Reports -->
+            <div class="reports-filter-card">
+                <div class="form-header">
+                    <div class="form-header-left">
+                        <span class="material-symbols-rounded form-header-icon">analytics</span>
+                        <h2 class="form-header-title">Filter Reports</h2>
+                    </div>
+                    <button type="button" class="filter-toggle-btn" onclick="toggleFilterForm()">
+                        <span class="material-symbols-rounded">expand_more</span>
+                    </button>
+                </div>
+                <form method="GET" class="filter-form" id="filterForm">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="start_date" class="form-label">Start Date</label>
@@ -123,84 +132,105 @@ while ($row = $result->fetch_assoc()) {
                         </button>
                     </div>
                 </form>
-            </div><!-- Analytics Overview -->
-            <div class="analytics-overview">
-                <div class="analytics-card">
-                    <span class="material-symbols-rounded analytics-icon">task_alt</span>
+            </div>
+
+            <!-- Analytics Overview -->
+            <div class="reports-analytics-grid">
+                <div class="reports-analytics-card">
+                    <div class="analytics-card-icon-wrapper">
+                        <span class="material-symbols-rounded analytics-icon">task_alt</span>
+                    </div>
                     <div class="analytics-content">
                         <div class="analytics-number"><?php echo $total_checkins; ?></div>
                         <div class="analytics-label">Total Check-ins</div>
+                        <div class="analytics-subtext">All visits combined</div>
                     </div>
                 </div>
-                <div class="analytics-card">
-                    <span class="material-symbols-rounded analytics-icon">calendar_month</span>
+                <div class="reports-analytics-card">
+                    <div class="analytics-card-icon-wrapper">
+                        <span class="material-symbols-rounded analytics-icon">calendar_month</span>
+                    </div>
                     <div class="analytics-content">
                         <div class="analytics-number"><?php echo $active_days; ?></div>
                         <div class="analytics-label">Active Days</div>
+                        <div class="analytics-subtext">With activity</div>
                     </div>
                 </div>
-                <div class="analytics-card">
-                    <span class="material-symbols-rounded analytics-icon">groups</span>
+                <div class="reports-analytics-card">
+                    <div class="analytics-card-icon-wrapper">
+                        <span class="material-symbols-rounded analytics-icon">groups</span>
+                    </div>
                     <div class="analytics-content">
                         <div class="analytics-number"><?php echo $unique_members; ?></div>
                         <div class="analytics-label">Unique Members</div>
+                        <div class="analytics-subtext">Distinct visitors</div>
                     </div>
                 </div>
-                <div class="analytics-card">
-                    <span class="material-symbols-rounded analytics-icon">analytics</span>
+                <div class="reports-analytics-card">
+                    <div class="analytics-card-icon-wrapper">
+                        <span class="material-symbols-rounded analytics-icon">trending_up</span>
+                    </div>
                     <div class="analytics-content">
                         <div class="analytics-number"><?php echo $avg_daily; ?></div>
                         <div class="analytics-label">Avg Daily</div>
+                        <div class="analytics-subtext">Per day average</div>
                     </div>
                 </div>
-            </div><!-- Charts Section -->
-            <div class="charts-section">
+            </div>
+
+            <!-- Charts Section -->
+            <div class="reports-charts-grid">
                 <!-- Daily Check-in Trends -->
-                <div class="chart-container">
+                <div class="reports-chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
-                            <span class="material-symbols-rounded">show_chart</span> Daily Check-in Trends
+                            <span class="material-symbols-rounded">show_chart</span>
+                            <span>Daily Check-in Trends</span>
                         </div>
                         <div class="chart-badge"><?php echo $active_days; ?> Days</div>
                     </div>
-                    <div class="chart-content"><canvas id="dailyTrendsChart"></canvas></div>
-                </div><!-- Top Members -->
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">
-                            <span class="material-symbols-rounded">emoji_events</span> Top Members
-                        </div>
-                        <div class="table-count">Top 10</div>
-                    </div><?php if (count($top_members) > 0): ?><div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Member</th>
-                                    <th>Membership</th>
-                                    <th>Check-ins</th>
-                                </tr>
-                            </thead>
-                            <tbody><?php foreach ($top_members as $member): ?><tr>
-                                    <td>
-                                        <div class="member-info">
-                                            <div class="member-name"><?php echo htmlspecialchars($member['name']); ?>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><span
-                                            class="badge badge-primary"><?php echo htmlspecialchars($member['membership_type']); ?></span>
-                                    </td>
-                                    <td>
-                                        <div class="checkin-count"><?php echo $member['checkins']; ?></div>
-                                    </td>
-                                </tr><?php endforeach; ?></tbody>
-                        </table>
-                    </div><?php else: ?><div class="empty-state">
-                        <h3 class="empty-state-title">No Data Available</h3>
-                        <p class="empty-state-description">No attendance data found for the selected date range.</p>
-                    </div><?php endif; ?>
+                    <div class="chart-content">
+                        <canvas id="dailyTrendsChart"></canvas>
+                    </div>
                 </div>
-            </div><!-- Additional Insights -->
+
+                <!-- Top Members -->
+                <div class="reports-chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span class="material-symbols-rounded">emoji_events</span>
+                            <span>Top Members</span>
+                        </div>
+                        <div class="chart-badge">Top <?php echo count($top_members); ?></div>
+                    </div>
+                    <div class="chart-content">
+                        <?php if (count($top_members) > 0): ?>
+                            <div class="top-members-list">
+                                <?php foreach ($top_members as $index => $member): ?>
+                                    <div class="top-member-item">
+                                        <div class="top-member-rank">#<?php echo $index + 1; ?></div>
+                                        <div class="top-member-content">
+                                            <h4 class="top-member-name"><?php echo htmlspecialchars($member['name']); ?></h4>
+                                            <span class="top-member-badge"><?php echo htmlspecialchars($member['membership_type']); ?></span>
+                                        </div>
+                                        <div class="top-member-checkins">
+                                            <span class="checkin-number"><?php echo $member['checkins']; ?></span>
+                                            <span class="checkin-label">check-ins</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="empty-state">
+                                <h3 class="empty-state-title">No Data Available</h3>
+                                <p class="empty-state-description">No attendance data found for the selected date range.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Insights -->
             <div class="insights-section">
                 <div class="insight-card">
                     <div class="insight-header">
@@ -249,6 +279,19 @@ while ($row = $result->fetch_assoc()) {
             document.getElementById('navbarMenu').classList.remove('active');
         });
     });
+
+    // Toggle filter form
+    function toggleFilterForm() {
+        const form = document.getElementById('filterForm');
+        const btn = document.querySelector('.filter-toggle-btn .material-symbols-rounded');
+        if (form.style.display === 'none') {
+            form.style.display = 'flex';
+            btn.textContent = 'expand_more';
+        } else {
+            form.style.display = 'none';
+            btn.textContent = 'expand_less';
+        }
+    }
 
     // Initialize Chart.js
     const ctx = document.getElementById('dailyTrendsChart').getContext('2d');
@@ -310,4 +353,5 @@ while ($row = $result->fetch_assoc()) {
     </script>
 </body>
 
+</html>
 </html>

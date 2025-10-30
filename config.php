@@ -1,9 +1,7 @@
 <?php
-/**
- * Simple Gym Management System - Configuration File
- * Database Connection Setup
- * Version: 1.0.0
- */
+
+// Set timezone to Asia/Kolkata (IST)
+date_default_timezone_set('Asia/Kolkata');
 
 // Start session only if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -16,6 +14,9 @@ define('DB_NAME', 'gym_system');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
+// Enable MySQLi exception mode for better error handling
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 // Create database connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
@@ -27,8 +28,11 @@ if ($conn->connect_error) {
 // Set charset to UTF-8
 $conn->set_charset("utf8mb4");
 
-// Timezone setting
-date_default_timezone_set('UTC');
+// Ensure autocommit is enabled (default) - transactions will be explicit
+$conn->autocommit(true);
+
+// Set MySQL timezone to match PHP timezone
+$conn->query("SET time_zone = '+05:30'");
 
 // Display errors in development (set to 0 in production)
 error_reporting(E_ALL);

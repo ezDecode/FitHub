@@ -52,12 +52,51 @@ if ($_POST) {
     
     if (isset($_POST['delete_member'])) {
         $id = $_POST['member_id'];
-        $stmt = $conn->prepare("DELETE FROM members WHERE id=?");
-        if ($stmt->bind_param("i", $id) && $stmt->execute()) {
-            $message = "Member deleted successfully!";
+        
+        // Start transaction to ensure all data is deleted together
+        $conn->begin_transaction();
+        
+        $success = true;
+        $error_message = '';
+        
+        // First, delete all attendance records for this member
+        $stmt = $conn->prepare("DELETE FROM attendance WHERE member_id=?");
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            if (!$stmt->execute()) {
+                $success = false;
+                $error_message = "Failed to delete attendance records: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            $success = false;
+            $error_message = "Failed to prepare attendance deletion: " . $conn->error;
+        }
+        
+        // Then, delete the member (only if attendance deletion succeeded)
+        if ($success) {
+            $stmt = $conn->prepare("DELETE FROM members WHERE id=?");
+            if ($stmt) {
+                $stmt->bind_param("i", $id);
+                if (!$stmt->execute()) {
+                    $success = false;
+                    $error_message = "Failed to delete member: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                $success = false;
+                $error_message = "Failed to prepare member deletion: " . $conn->error;
+            }
+        }
+        
+        // Commit or rollback based on success
+        if ($success) {
+            $conn->commit();
+            $message = "Member and all related attendance records deleted successfully!";
             $message_type = "success";
         } else {
-            $message = "Error deleting member!";
+            $conn->rollback();
+            $message = "Error deleting member: " . $error_message;
             $message_type = "danger";
         }
     }
@@ -115,22 +154,31 @@ while ($row = $result->fetch_assoc()) {
         </div>
     </nav>
 
-    <!-- Page Header -->
-    <section class="page-header">
-        <div class="container">
-            <h1 class="page-title">Members</h1>
-            <p class="page-subtitle">Manage your gym members with comprehensive profiles and membership tracking.</p>
-        </div>
-    </section>
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
+            <!-- Quick Actions Bar -->
+            <div class="quick-actions-bar">
+                <div class="quick-actions-left">
+                    <h2 class="page-section-title">Member Management</h2>
+                    <p class="page-section-subtitle">Manage your gym members efficiently</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="toggleFormBtn" onclick="toggleMemberForm()">
+                    <span class="material-symbols-rounded"><?php echo $edit_member ? 'close' : 'person_add'; ?></span>
+                    <span><?php echo $edit_member ? 'Cancel' : 'Add New Member'; ?></span>
+                </button>
+            </div>
+
             <!-- Add/Edit Member Form -->
-            <div class="form-container" id="memberFormContainer" style="display: none;">
+            <div class="form-container member-form-wrapper" id="memberFormContainer" style="display: none;">
                 <div class="form-header">
-                    <span class="material-symbols-rounded form-header-icon"><?php echo $edit_member ? 'edit' : 'person_add'; ?></span>
-                    <h2 class="form-header-title"><?php echo $edit_member ? 'Edit Member' : 'Add New Member'; ?></h2>
+                    <div class="form-header-left">
+                        <span class="material-symbols-rounded form-header-icon"><?php echo $edit_member ? 'edit' : 'person_add'; ?></span>
+                        <h2 class="form-header-title"><?php echo $edit_member ? 'Edit Member' : 'Add New Member'; ?></h2>
+                    </div>
+                    <button type="button" class="form-close-btn" onclick="toggleMemberForm()">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
                 </div>
                 
                 <form method="POST" class="member-form">
@@ -203,82 +251,84 @@ while ($row = $result->fetch_assoc()) {
             </div>
 
             <!-- Members Directory -->
-            <div class="table-container">
-                <div class="table-header">
-                    <div class="table-title">
-                        <span></span>
-                        Members Directory
+            <div class="members-directory">
+                <div class="directory-header">
+                    <div class="directory-title-wrapper">
+                        <span class="material-symbols-rounded directory-title-icon">groups</span>
+                        <div>
+                            <h2 class="directory-title">Members Directory</h2>
+                            <p class="directory-subtitle">All registered gym members</p>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: var(--space-3); align-items: center;">
-                        <button type="button" class="btn btn-primary" id="toggleFormBtn" onclick="toggleMemberForm()">
-                            <span class="material-symbols-rounded">person_add</span>
-                            <span>Add New Member</span>
-                        </button>
-                        <div class="table-count"><?php echo count($members); ?> Total</div>
+                    <div class="directory-stats">
+                        <span class="directory-stat-badge"><?php echo count($members); ?> Total</span>
+                        <?php 
+                            $active_count = count(array_filter($members, function($m) { return $m['status'] == 'active'; })); 
+                        ?>
+                        <span class="directory-stat-badge directory-stat-active"><?php echo $active_count; ?> Active</span>
                     </div>
                 </div>
                 
                 <?php if (count($members) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Member</th>
-                                    <th>Contact Information</th>
-                                    <th>Membership</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($members as $member): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="member-info">
-                                                <div class="member-name"><?php echo htmlspecialchars($member['name']); ?></div>
-                                                <div class="member-detail">Joined: <?php echo date('M j, Y', strtotime($member['join_date'])); ?></div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="contact-info">
-                                                <div class="contact-email"><?php echo htmlspecialchars($member['email']); ?></div>
-                                                <div class="contact-phone"><?php echo htmlspecialchars($member['phone']); ?></div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-primary"><?php echo htmlspecialchars($member['membership_type']); ?></span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-<?php echo $member['status'] == 'active' ? 'success' : 'warning'; ?>">
-                                                <?php echo ucfirst($member['status']); ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <a href="?edit=<?php echo $member['id']; ?>" class="btn btn-sm btn-secondary">
-                                                    <span>Edit</span>
-                                                </a>
-                                                <form method="POST" style="display: inline;" data-confirm="Are you sure you want to delete this member?" data-member-name="<?php echo htmlspecialchars($member['name']); ?>">
-                                                    <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                                                    <button type="submit" name="delete_member" class="btn btn-sm btn-danger">
-                                                        <span>Delete</span>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                    <div class="members-grid">
+                        <?php foreach ($members as $member): ?>
+                            <div class="member-card">
+                                <div class="member-card-header">
+                                    <div class="member-avatar">
+                                        <span class="material-symbols-rounded">person</span>
+                                    </div>
+                                    <div class="member-card-badges">
+                                        <span class="badge badge-<?php echo $member['status'] == 'active' ? 'success' : 'warning'; ?>">
+                                            <?php echo ucfirst($member['status']); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="member-card-body">
+                                    <h3 class="member-card-name"><?php echo htmlspecialchars($member['name']); ?></h3>
+                                    <div class="member-card-info">
+                                        <div class="member-card-item">
+                                            <span class="material-symbols-rounded member-card-icon">mail</span>
+                                            <span class="member-card-text"><?php echo htmlspecialchars($member['email']); ?></span>
+                                        </div>
+                                        <div class="member-card-item">
+                                            <span class="material-symbols-rounded member-card-icon">phone</span>
+                                            <span class="member-card-text"><?php echo htmlspecialchars($member['phone']); ?></span>
+                                        </div>
+                                        <div class="member-card-item">
+                                            <span class="material-symbols-rounded member-card-icon">calendar_today</span>
+                                            <span class="member-card-text">Joined <?php echo date('M j, Y', strtotime($member['join_date'])); ?></span>
+                                        </div>
+                                        <div class="member-card-item">
+                                            <span class="material-symbols-rounded member-card-icon">stars</span>
+                                            <span class="member-card-text"><?php echo htmlspecialchars($member['membership_type']); ?> Plan</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="member-card-actions">
+                                    <a href="?edit=<?php echo $member['id']; ?>" class="btn btn-sm btn-secondary">
+                                        <span class="material-symbols-rounded">edit</span>
+                                        <span>Edit</span>
+                                    </a>
+                                    <form method="POST" style="display: inline;" data-confirm="Are you sure you want to delete this member?" data-member-name="<?php echo htmlspecialchars($member['name']); ?>">
+                                        <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
+                                        <button type="submit" name="delete_member" class="btn btn-sm btn-danger">
+                                            <span class="material-symbols-rounded">delete</span>
+                                            <span>Delete</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 <?php else: ?>
                     <div class="empty-state">
                         <span class="material-symbols-rounded empty-state-icon">group_off</span>
                         <h3 class="empty-state-title">No Members Found</h3>
                         <p class="empty-state-description">Start building your gym community by adding your first member.</p>
-                        <a href="#add-member" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" onclick="toggleMemberForm()">
+                            <span class="material-symbols-rounded">person_add</span>
                             <span>Add First Member</span>
-                        </a>
+                        </button>
                     </div>
                 <?php endif; ?>
             </div>
@@ -320,10 +370,15 @@ while ($row = $result->fetch_assoc()) {
                 toggleBtn.classList.remove('btn-primary');
                 toggleBtn.classList.add('btn-secondary');
             } else {
-                formContainer.style.display = 'none';
-                toggleBtn.innerHTML = '<span class="material-symbols-rounded">person_add</span><span>Add New Member</span>';
-                toggleBtn.classList.remove('btn-secondary');
-                toggleBtn.classList.add('btn-primary');
+                // If canceling edit, redirect to clean page
+                <?php if ($edit_member): ?>
+                    window.location.href = 'members.php';
+                <?php else: ?>
+                    formContainer.style.display = 'none';
+                    toggleBtn.innerHTML = '<span class="material-symbols-rounded">person_add</span><span>Add New Member</span>';
+                    toggleBtn.classList.remove('btn-secondary');
+                    toggleBtn.classList.add('btn-primary');
+                <?php endif; ?>
             }
         }
 
@@ -336,33 +391,36 @@ while ($row = $result->fetch_assoc()) {
         <?php endif; ?>
 
         // Form validation
-        document.querySelector('.member-form').addEventListener('submit', function(e) {
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            
-            if (!name || !email || !phone) {
-                e.preventDefault();
-                showToast('Please fill in all required fields.', 'error', 'Validation Error');
-                return false;
-            }
-            
-            // Basic email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                e.preventDefault();
-                showToast('Please enter a valid email address.', 'error', 'Validation Error');
-                return false;
-            }
-            
-            // Basic phone validation
-            const phoneRegex = /^\d{10}$/;
-            if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
-                e.preventDefault();
-                showToast('Please enter a valid 10-digit phone number.', 'error', 'Validation Error');
-                return false;
-            }
-        });
+        const memberForm = document.querySelector('.member-form');
+        if (memberForm) {
+            memberForm.addEventListener('submit', function(e) {
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                
+                if (!name || !email || !phone) {
+                    e.preventDefault();
+                    showToast('Please fill in all required fields.', 'error', 'Validation Error');
+                    return false;
+                }
+                
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    e.preventDefault();
+                    showToast('Please enter a valid email address.', 'error', 'Validation Error');
+                    return false;
+                }
+                
+                // Basic phone validation
+                const phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                    e.preventDefault();
+                    showToast('Please enter a valid 10-digit phone number.', 'error', 'Validation Error');
+                    return false;
+                }
+            });
+        }
     </script>
 </body>
 </html>
