@@ -8,12 +8,16 @@ if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     exit;
 }
 
+// Variables to show messages to user
 $message = '';
 $message_type = '';
 
-// Handle form submission
+// Check if form was submitted (user clicked a button)
 if ($_POST) {
+    
+    // ADD NEW MEMBER
     if (isset($_POST['add_member'])) {
+        // Step 1: Get all data from the form
         $name = $_POST['name'];
         $email = $_POST['email'];
         $phone = $_POST['phone'];
@@ -21,168 +25,113 @@ if ($_POST) {
         $membership_type = $_POST['membership_type'];
         $status = $_POST['status'];
         
-        // Pre-check duplicates for friendly errors
-        $dup = $conn->prepare("SELECT id FROM members WHERE email=? LIMIT 1");
-        $dup->bind_param("s", $email);
-        $dup->execute();
-        $dup->store_result();
-        if ($dup->num_rows > 0) {
+        // Step 2: Check if this email is already used by someone else
+        $check_email = $conn->query("SELECT id FROM members WHERE email='$email'");
+        
+        // Step 3: If email exists, show error
+        if ($check_email->num_rows > 0) {
             $message = "A member with this email already exists.";
             $message_type = "danger";
-            $dup->close();
-        } else {
-            $dup->close();
-            // Check same person (name + phone)
-            $dup2 = $conn->prepare("SELECT id FROM members WHERE name=? AND phone=? LIMIT 1");
-            $dup2->bind_param("ss", $name, $phone);
-            $dup2->execute();
-            $dup2->store_result();
-            if ($dup2->num_rows > 0) {
-                $message = "Member already exists with the same name and phone.";
-                $message_type = "danger";
-                $dup2->close();
+        } 
+        // Step 4: If email is new, add the member
+        else {
+            $add_member_query = "INSERT INTO members (name, email, phone, join_date, membership_type, status) 
+                                 VALUES ('$name', '$email', '$phone', '$join_date', '$membership_type', '$status')";
+            
+            // Try to add the member
+            if ($conn->query($add_member_query)) {
+                $message = "Member added successfully!";
+                $message_type = "success";
             } else {
-                $dup2->close();
-                try {
-                    $stmt = $conn->prepare("INSERT INTO members (name, email, phone, join_date, membership_type, status) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("ssssss", $name, $email, $phone, $join_date, $membership_type, $status);
-                    $stmt->execute();
-                    $message = "Member added successfully!";
-                    $message_type = "success";
-                } catch (mysqli_sql_exception $e) {
-                    if ($e->getCode() === 1062) { // duplicate key safety
-                        $message = "A member with this email already exists.";
-                        $message_type = "danger";
-                    } else {
-                        $message = "Error adding member: " . $e->getMessage();
-                        $message_type = "danger";
-                    }
-                } finally {
-                    if (isset($stmt) && $stmt instanceof mysqli_stmt) { $stmt->close(); }
-                }
+                $message = "Error adding member.";
+                $message_type = "danger";
             }
         }
     }
     
+    // UPDATE EXISTING MEMBER
     if (isset($_POST['update_member'])) {
-        $id = $_POST['member_id'];
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $phone = $_POST['phone'];
-        $join_date = $_POST['join_date'];
-        $membership_type = $_POST['membership_type'];
-        $status = $_POST['status'];
+        // Step 1: Get the member ID and all new data from form
+        $member_id = $_POST['member_id'];
+        $new_name = $_POST['name'];
+        $new_email = $_POST['email'];
+        $new_phone = $_POST['phone'];
+        $new_join_date = $_POST['join_date'];
+        $new_membership_type = $_POST['membership_type'];
+        $new_status = $_POST['status'];
         
-        // Pre-check duplicates
-        $dup = $conn->prepare("SELECT id FROM members WHERE email=? AND id<>? LIMIT 1");
-        $dup->bind_param("si", $email, $id);
-        $dup->execute();
-        $dup->store_result();
-        if ($dup->num_rows > 0) {
+        // Step 2: Check if new email is already used by a DIFFERENT member
+        $check_email = $conn->query("SELECT id FROM members WHERE email='$new_email' AND id != $member_id");
+        
+        // Step 3: If email is taken by someone else, show error
+        if ($check_email->num_rows > 0) {
             $message = "Email already in use by another member.";
             $message_type = "danger";
-            $dup->close();
-        } else {
-            $dup->close();
-            $dup2 = $conn->prepare("SELECT id FROM members WHERE name=? AND phone=? AND id<>? LIMIT 1");
-            $dup2->bind_param("ssi", $name, $phone, $id);
-            $dup2->execute();
-            $dup2->store_result();
-            if ($dup2->num_rows > 0) {
-                $message = "Another member already exists with the same name and phone.";
-                $message_type = "danger";
-                $dup2->close();
+        } 
+        // Step 4: If email is OK, update the member
+        else {
+            $update_query = "UPDATE members 
+                            SET name='$new_name', 
+                                email='$new_email', 
+                                phone='$new_phone', 
+                                join_date='$new_join_date', 
+                                membership_type='$new_membership_type', 
+                                status='$new_status' 
+                            WHERE id=$member_id";
+            
+            // Try to update
+            if ($conn->query($update_query)) {
+                $message = "Member updated successfully!";
+                $message_type = "success";
             } else {
-                $dup2->close();
-                try {
-                    $stmt = $conn->prepare("UPDATE members SET name=?, email=?, phone=?, join_date=?, membership_type=?, status=? WHERE id=?");
-                    $stmt->bind_param("ssssssi", $name, $email, $phone, $join_date, $membership_type, $status, $id);
-                    $stmt->execute();
-                    $message = "Member updated successfully!";
-                    $message_type = "success";
-                } catch (mysqli_sql_exception $e) {
-                    if ($e->getCode() === 1062) {
-                        $message = "Email already in use by another member.";
-                        $message_type = "danger";
-                    } else {
-                        $message = "Error updating member: " . $e->getMessage();
-                        $message_type = "danger";
-                    }
-                } finally {
-                    if (isset($stmt) && $stmt instanceof mysqli_stmt) { $stmt->close(); }
-                }
+                $message = "Error updating member.";
+                $message_type = "danger";
             }
         }
     }
     
+    // DELETE MEMBER
     if (isset($_POST['delete_member'])) {
-        $id = $_POST['member_id'];
+        // Step 1: Get the member ID to delete
+        $member_id = $_POST['member_id'];
         
-        // Start transaction to ensure all data is deleted together
-        $conn->begin_transaction();
+        // Step 2: First delete all attendance records for this member
+        // (We must delete attendance first because it depends on the member)
+        $delete_attendance = $conn->query("DELETE FROM attendance WHERE member_id=$member_id");
         
-        $success = true;
-        $error_message = '';
+        // Step 3: Now delete the member
+        $delete_member = $conn->query("DELETE FROM members WHERE id=$member_id");
         
-        // First, delete all attendance records for this member
-        $stmt = $conn->prepare("DELETE FROM attendance WHERE member_id=?");
-        if ($stmt) {
-            $stmt->bind_param("i", $id);
-            if (!$stmt->execute()) {
-                $success = false;
-                $error_message = "Failed to delete attendance records: " . $stmt->error;
-            }
-            $stmt->close();
-        } else {
-            $success = false;
-            $error_message = "Failed to prepare attendance deletion: " . $conn->error;
-        }
-        
-        // Then, delete the member (only if attendance deletion succeeded)
-        if ($success) {
-            $stmt = $conn->prepare("DELETE FROM members WHERE id=?");
-            if ($stmt) {
-                $stmt->bind_param("i", $id);
-                if (!$stmt->execute()) {
-                    $success = false;
-                    $error_message = "Failed to delete member: " . $stmt->error;
-                }
-                $stmt->close();
-            } else {
-                $success = false;
-                $error_message = "Failed to prepare member deletion: " . $conn->error;
-            }
-        }
-        
-        // Commit or rollback based on success
-        if ($success) {
-            $conn->commit();
-            $message = "Member and all related attendance records deleted successfully!";
+        // Step 4: Check if deletion worked
+        if ($delete_member) {
+            $message = "Member deleted successfully!";
             $message_type = "success";
         } else {
-            $conn->rollback();
-            $message = "Error deleting member: " . $error_message;
+            $message = "Error deleting member.";
             $message_type = "danger";
         }
     }
 }
 
-// Handle edit
+// CHECK IF WE ARE EDITING A MEMBER
+// If URL has ?edit=5, we are editing member with ID 5
 $edit_member = null;
 if (isset($_GET['edit'])) {
-    $id = $_GET['edit'];
-    $stmt = $conn->prepare("SELECT * FROM members WHERE id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $edit_member = $result->fetch_assoc();
+    $member_id = $_GET['edit'];
+    
+    // Get this member's data from database
+    $get_member = $conn->query("SELECT * FROM members WHERE id=$member_id");
+    $edit_member = $get_member->fetch_assoc();
 }
 
-// Fetch all members
-$result = $conn->query("SELECT * FROM members ORDER BY name");
+// GET ALL MEMBERS FROM DATABASE
+// This will show in the members list below
+$all_members_query = $conn->query("SELECT * FROM members ORDER BY name");
+
+// Put all members into an array
 $members = [];
-while ($row = $result->fetch_assoc()) {
-    $members[] = $row;
+while ($one_member = $all_members_query->fetch_assoc()) {
+    $members[] = $one_member;
 }
 ?>
 <!DOCTYPE html>

@@ -8,45 +8,62 @@ if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
  exit;
 }
 
-// Get date range from URL parameters or use default
+// GET DATE RANGE FOR REPORTS
+// If user selected dates, use those. Otherwise use current month.
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 
-// Fetch report data
-$total_checkins = $conn->query("SELECT COUNT(*) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'")->fetch_assoc()['total'];
+// QUERY 1: Count total check-ins in date range
+$query1 = "SELECT COUNT(*) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
+$result1 = $conn->query($query1);
+$total_checkins = $result1->fetch_assoc()['total'];
 
-$active_days = $conn->query("SELECT COUNT(DISTINCT date) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'")->fetch_assoc()['total'];
+// QUERY 2: Count how many different days had activity
+$query2 = "SELECT COUNT(DISTINCT date) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
+$result2 = $conn->query($query2);
+$active_days = $result2->fetch_assoc()['total'];
 
-$unique_members = $conn->query("SELECT COUNT(DISTINCT member_id) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'")->fetch_assoc()['total'];
+// QUERY 3: Count how many unique members visited
+$query3 = "SELECT COUNT(DISTINCT member_id) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
+$result3 = $conn->query($query3);
+$unique_members = $result3->fetch_assoc()['total'];
 
-$avg_daily = $active_days > 0 ? round($total_checkins / $active_days, 1) : 0;
-
-// Daily check-in trends
-$result = $conn->query("
-    SELECT date, COUNT(*) as checkins 
-    FROM attendance
-    WHERE date BETWEEN '$start_date' AND '$end_date' 
-    GROUP BY date 
-    ORDER BY date
-");
-$daily_trends = [];
-while ($row = $result->fetch_assoc()) {
-    $daily_trends[] = $row;
+// CALCULATE AVERAGE: Total check-ins divided by active days
+// Make sure we don't divide by zero!
+if ($active_days > 0) {
+    $avg_daily = round($total_checkins / $active_days, 1);
+} else {
+    $avg_daily = 0;
 }
 
-// Top members
-$result = $conn->query("
-    SELECT m.name, m.membership_type, COUNT(a.id) as checkins 
-    FROM members m 
-    JOIN attendance a ON m.id = a.member_id 
-    WHERE a.date BETWEEN '$start_date' AND '$end_date' 
-    GROUP BY m.id 
-    ORDER BY checkins DESC 
-    LIMIT 10
-");
+// QUERY 4: Get check-ins for each day (for the chart)
+$query4 = "SELECT date, COUNT(*) as checkins 
+          FROM attendance
+          WHERE date BETWEEN '$start_date' AND '$end_date' 
+          GROUP BY date 
+          ORDER BY date";
+$result4 = $conn->query($query4);
+
+// Put daily data into array
+$daily_trends = [];
+while ($one_day = $result4->fetch_assoc()) {
+    $daily_trends[] = $one_day;
+}
+
+// QUERY 5: Get top 10 most active members
+$query5 = "SELECT m.name, m.membership_type, COUNT(a.id) as checkins 
+          FROM members m 
+          JOIN attendance a ON m.id = a.member_id 
+          WHERE a.date BETWEEN '$start_date' AND '$end_date' 
+          GROUP BY m.id 
+          ORDER BY checkins DESC 
+          LIMIT 10";
+$result5 = $conn->query($query5);
+
+// Put top members into array
 $top_members = [];
-while ($row = $result->fetch_assoc()) {
-    $top_members[] = $row;
+while ($one_member = $result5->fetch_assoc()) {
+    $top_members[] = $one_member;
 }
 ?>
 <!DOCTYPE html>

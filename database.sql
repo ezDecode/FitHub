@@ -1,7 +1,3 @@
--- Simple Gym Management System Database
--- Created: 2025-10-26
--- Version: 1.0.0
-
 -- Create the database
 CREATE DATABASE IF NOT EXISTS gym_system;
 USE gym_system;
@@ -46,7 +42,6 @@ CREATE TABLE attendance (
     UNIQUE KEY unique_member_date (member_id, date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- No sample data - clean database for production use
 
 -- Show success message
 SELECT 'Database setup completed successfully!' AS Status;

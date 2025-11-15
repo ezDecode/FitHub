@@ -8,66 +8,78 @@ if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     exit;
 }
 
+// Variables to show messages
 $message = '';
 $message_type = '';
 
-// Handle check-in/check-out
+// Check if form was submitted
 if ($_POST) {
+    
+    // MEMBER CHECK-IN
     if (isset($_POST['check_in'])) {
+        // Step 1: Get member ID from form
         $member_id = $_POST['member_id'];
-        $check_in_time = date('Y-m-d H:i:s');
-        $current_date = date('Y-m-d');
         
-        $stmt = $conn->prepare("INSERT INTO attendance (member_id, check_in_time, date) VALUES (?, ?, ?)");
-        if ($stmt->bind_param("iss", $member_id, $check_in_time, $current_date) && $stmt->execute()) {
+        // Step 2: Get current time and date
+        $current_time = date('Y-m-d H:i:s');  // Example: 2025-11-15 14:30:00
+        $today_date = date('Y-m-d');          // Example: 2025-11-15
+        
+        // Step 3: Save check-in to database
+        $checkin_query = "INSERT INTO attendance (member_id, check_in_time, date) 
+                         VALUES ($member_id, '$current_time', '$today_date')";
+        
+        // Step 4: Show success or error message
+        if ($conn->query($checkin_query)) {
             $message = "Member checked in successfully at " . date('g:i A');
             $message_type = "success";
         } else {
-            $message = "Error checking in member: " . $stmt->error;
+            $message = "Error checking in member.";
             $message_type = "danger";
         }
     }
     
+    // MEMBER CHECK-OUT
     if (isset($_POST['check_out'])) {
+        // Step 1: Get attendance record ID
         $attendance_id = $_POST['attendance_id'];
-        $check_out_time = date('Y-m-d H:i:s');
         
-        $stmt = $conn->prepare("UPDATE attendance SET check_out_time = ? WHERE id = ?");
-        if ($stmt->bind_param("si", $check_out_time, $attendance_id) && $stmt->execute()) {
+        // Step 2: Get current time for check-out
+        $current_time = date('Y-m-d H:i:s');
+        
+        // Step 3: Update the record with check-out time
+        $checkout_query = "UPDATE attendance 
+                          SET check_out_time = '$current_time' 
+                          WHERE id = $attendance_id";
+        
+        // Step 4: Show success or error message
+        if ($conn->query($checkout_query)) {
             $message = "Member checked out successfully at " . date('g:i A');
             $message_type = "success";
         } else {
-            $message = "Error checking out member: " . $stmt->error;
+            $message = "Error checking out member.";
             $message_type = "danger";
         }
     }
 }
 
-// Fetch today's attendance
-$today_date = date('Y-m-d'); // Get today's date in IST
-$current_datetime = date('Y-m-d H:i:s'); // Get current datetime in IST
+// GET TODAY'S ATTENDANCE RECORDS
+// Step 1: Get today's date
+$today = date('Y-m-d');
 
-$stmt = $conn->prepare("
-    SELECT a.*, m.name, m.membership_type,
-        CASE 
-            WHEN a.check_out_time IS NULL THEN 'Still in Gym'
-            ELSE DATE_FORMAT(a.check_out_time, '%h:%i %p')
-        END as check_out_display,
-        CASE 
-            WHEN a.check_out_time IS NULL THEN TIMESTAMPDIFF(MINUTE, a.check_in_time, ?)
-            ELSE TIMESTAMPDIFF(MINUTE, a.check_in_time, a.check_out_time)
-        END as duration_minutes
-    FROM attendance a 
-    JOIN members m ON a.member_id = m.id 
-    WHERE a.date = ?
-    ORDER BY a.check_in_time DESC
-");
-$stmt->bind_param("ss", $current_datetime, $today_date);
-$stmt->execute();
-$result = $stmt->get_result();
+// Step 2: Get all attendance for today with member names
+// We JOIN the members table to get member names
+$today_attendance_query = "SELECT a.*, m.name, m.membership_type
+                          FROM attendance a 
+                          JOIN members m ON a.member_id = m.id 
+                          WHERE a.date = '$today'
+                          ORDER BY a.check_in_time DESC";
+
+$attendance_result = $conn->query($today_attendance_query);
+
+// Step 3: Put all records into an array
 $today_attendance = [];
-while ($row = $result->fetch_assoc()) {
-    $today_attendance[] = $row;
+while ($one_record = $attendance_result->fetch_assoc()) {
+    $today_attendance[] = $one_record;
 }
 
 // Fetch all members for dropdown
@@ -92,8 +104,10 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
     <title>Attendance - FitHub Gym Management</title>
     <link rel="stylesheet" href="assets/css/fonts.css?v=3.3">
     <link rel="stylesheet" href="assets/css/style.css?v=3.3">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
 </head>
 
 <body>
@@ -118,7 +132,7 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
             </ul>
         </div>
     </nav>
-    
+
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
@@ -141,7 +155,7 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                 <button class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
             </div>
             <?php endif; ?>
-            
+
             <!-- Check-in Form -->
             <div class="checkin-form-card">
                 <div class="form-header">
@@ -189,7 +203,7 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                     </div>
                 </form>
             </div>
-            
+
             <!-- Today's Summary -->
             <div class="attendance-summary-cards">
                 <div class="attendance-summary-card">
@@ -223,7 +237,7 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                     </div>
                 </div>
             </div>
-            
+
             <!-- Today's Attendance -->
             <div class="attendance-list-container">
                 <div class="attendance-list-header">
@@ -239,70 +253,85 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                 <?php if (count($today_attendance) > 0): ?>
                 <div class="attendance-list">
                     <?php foreach ($today_attendance as $attendance): ?>
-                        <div class="attendance-item <?php echo $attendance['check_out_time'] === null ? 'active-session' : 'completed-session'; ?>">
-                            <div class="attendance-item-status">
-                                <?php if ($attendance['check_out_time'] === null): ?>
-                                    <span class="status-dot"></span>
-                                <?php else: ?>
-                                    <span class="material-symbols-rounded status-icon">check_circle</span>
-                                <?php endif; ?>
+                    <div
+                        class="attendance-item <?php echo $attendance['check_out_time'] === null ? 'active-session' : 'completed-session'; ?>">
+                        <div class="attendance-item-status">
+                            <?php if ($attendance['check_out_time'] === null): ?>
+                            <span class="status-dot"></span>
+                            <?php else: ?>
+                            <span class="material-symbols-rounded status-icon">check_circle</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="attendance-item-content">
+                            <div class="attendance-item-main">
+                                <h3 class="attendance-member-name"><?php echo htmlspecialchars($attendance['name']); ?>
+                                </h3>
+                                <span
+                                    class="attendance-membership-badge"><?php echo $attendance['membership_type']; ?></span>
                             </div>
-                            <div class="attendance-item-content">
-                                <div class="attendance-item-main">
-                                    <h3 class="attendance-member-name"><?php echo htmlspecialchars($attendance['name']); ?></h3>
-                                    <span class="attendance-membership-badge"><?php echo $attendance['membership_type']; ?></span>
+                            <div class="attendance-item-details">
+                                <div class="attendance-detail">
+                                    <span class="material-symbols-rounded attendance-detail-icon">login</span>
+                                    <span
+                                        class="attendance-detail-text"><?php echo date('g:i A', strtotime($attendance['check_in_time'])); ?></span>
                                 </div>
-                                <div class="attendance-item-details">
-                                    <div class="attendance-detail">
-                                        <span class="material-symbols-rounded attendance-detail-icon">login</span>
-                                        <span class="attendance-detail-text"><?php echo date('g:i A', strtotime($attendance['check_in_time'])); ?></span>
-                                    </div>
-                                    <?php if ($attendance['check_out_time'] !== null): ?>
-                                        <div class="attendance-detail">
-                                            <span class="material-symbols-rounded attendance-detail-icon">logout</span>
-                                            <span class="attendance-detail-text"><?php echo $attendance['check_out_display']; ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="attendance-detail">
-                                        <span class="material-symbols-rounded attendance-detail-icon">schedule</span>
-                                        <span class="attendance-detail-text" 
-                                            <?php if ($attendance['check_out_time'] === null): ?>
-                                                data-check-in="<?php echo strtotime($attendance['check_in_time']); ?>" 
-                                                data-live-duration="true"
-                                            <?php endif; ?>>
-                                            <?php 
-                                                $hours = floor($attendance['duration_minutes'] / 60);
-                                                $minutes = $attendance['duration_minutes'] % 60;
+                                <?php if ($attendance['check_out_time'] !== null): ?>
+                                <div class="attendance-detail">
+                                    <span class="material-symbols-rounded attendance-detail-icon">logout</span>
+                                    <span
+                                        class="attendance-detail-text"><?php echo date('g:i A', strtotime($attendance['check_out_time'])); ?></span>
+                                </div>
+                                <?php endif; ?>
+                                <div class="attendance-detail">
+                                    <span class="material-symbols-rounded attendance-detail-icon">schedule</span>
+                                    <span class="attendance-detail-text"
+                                        <?php if ($attendance['check_out_time'] === null): ?>
+                                        data-check-in="<?php echo strtotime($attendance['check_in_time']); ?>"
+                                        data-live-duration="true" <?php endif; ?>>
+                                        <?php 
+                                                // Calculate duration in simple way
+                                                if ($attendance['check_out_time'] !== null) {
+                                                    $check_in = strtotime($attendance['check_in_time']);
+                                                    $check_out = strtotime($attendance['check_out_time']);
+                                                    $duration_minutes = ($check_out - $check_in) / 60;
+                                                } else {
+                                                    $check_in = strtotime($attendance['check_in_time']);
+                                                    $now = time();
+                                                    $duration_minutes = ($now - $check_in) / 60;
+                                                }
+                                                $hours = floor($duration_minutes / 60);
+                                                $minutes = floor($duration_minutes % 60);
                                                 echo $hours . 'h ' . $minutes . 'm';
                                             ?>
-                                        </span>
-                                    </div>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="attendance-item-actions">
-                                <?php if ($attendance['check_out_time'] === null): ?>
-                                <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="attendance_id" value="<?php echo $attendance['id']; ?>">
-                                    <button type="submit" name="check_out" class="btn btn-sm btn-warning">
-                                        <span class="material-symbols-rounded">logout</span>
-                                        <span>Check Out</span>
-                                    </button>
-                                </form>
-                                <?php else: ?>
-                                <span class="completed-badge">
-                                    <span class="material-symbols-rounded">check_circle</span>
-                                    <span>Completed</span>
-                                </span>
-                                <?php endif; ?>
-                            </div>
                         </div>
+                        <div class="attendance-item-actions">
+                            <?php if ($attendance['check_out_time'] === null): ?>
+                            <form method="POST" style="display: inline;">
+                                <input type="hidden" name="attendance_id" value="<?php echo $attendance['id']; ?>">
+                                <button type="submit" name="check_out" class="btn btn-sm btn-warning">
+                                    <span class="material-symbols-rounded">logout</span>
+                                    <span>Check Out</span>
+                                </button>
+                            </form>
+                            <?php else: ?>
+                            <span class="completed-badge">
+                                <span class="material-symbols-rounded">check_circle</span>
+                                <span>Completed</span>
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
                 <div class="empty-state">
                     <span class="material-symbols-rounded empty-state-icon">event_busy</span>
                     <h3 class="empty-state-title">No Check-ins Today</h3>
-                    <p class="empty-state-description">No members have checked in today. Start tracking attendance by checking in
+                    <p class="empty-state-description">No members have checked in today. Start tracking attendance by
+                        checking in
                         your first member.</p>
                     <a href="#checkin" class="btn btn-primary">
                         <span class="material-symbols-rounded">check_circle</span>
@@ -316,7 +345,7 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
 
     <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
-    
+
     <script src="assets/js/script.js"></script>
     <script>
     // Mobile navigation toggle
@@ -346,13 +375,13 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
             hour: '2-digit',
             minute: '2-digit'
         });
-        
+
         // Update form time
         const formTime = document.getElementById('current_time');
         if (formTime) {
             formTime.value = timeString;
         }
-        
+
         // Update display time
         const displayTime = document.getElementById('liveTimeDisplay');
         if (displayTime) {
@@ -368,14 +397,14 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
     function updateLiveDurations() {
         const liveDurations = document.querySelectorAll('[data-live-duration="true"]');
         const now = Math.floor(Date.now() / 1000); // Current time in seconds
-        
+
         liveDurations.forEach(element => {
             const checkInTime = parseInt(element.getAttribute('data-check-in'));
             const durationSeconds = now - checkInTime;
             const durationMinutes = Math.floor(durationSeconds / 60);
             const hours = Math.floor(durationMinutes / 60);
             const minutes = durationMinutes % 60;
-            
+
             element.textContent = hours + 'h ' + minutes + 'm';
         });
     }

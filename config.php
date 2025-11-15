@@ -1,71 +1,28 @@
 <?php
+// ========================================
+// DATABASE CONNECTION FILE
+// ========================================
+// This file connects to the MySQL database
+// Include this file at the top of every page
 
-// Set timezone to Asia/Kolkata (IST)
+// Set timezone to India (IST)
 date_default_timezone_set('Asia/Kolkata');
 
-// Start session only if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Database connection settings
+$db_host = 'localhost';        // Where is the database? (Usually localhost)
+$db_name = 'gym_system';       // What is the database name?
+$db_user = 'root';             // Database username
+$db_pass = '';                 // Database password (empty for XAMPP)
 
-// Database configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'gym_system');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Connect to the database
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
-// Enable MySQLi exception mode for better error handling
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-// Create database connection
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-// Check connection
+// Check if connection worked
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // If connection failed, stop and show error
+    die("Cannot connect to database: " . $conn->connect_error);
 }
 
-// Set charset to UTF-8
+// Set character encoding (supports all languages and special characters)
 $conn->set_charset("utf8mb4");
-
-// Ensure autocommit is enabled (default) - transactions will be explicit
-$conn->autocommit(true);
-
-// Set MySQL timezone to match PHP timezone
-$conn->query("SET time_zone = '+05:30'");
-
-// Display errors in development (set to 0 in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Helper function for safe output
-function escape_html($text) {
-    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-}
-
-// Helper function for success messages
-function show_success($message) {
-    return '<div class="alert alert-success alert-dismissible fade show" role="alert">
-                ' . escape_html($message) . '
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>';
-}
-
-// Helper function for error messages
-function show_error($message) {
-    return '<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ' . escape_html($message) . '
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>';
-}
-
-// Helper function for validation
-function validate_email($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
-}
-
-// Helper function for phone validation (10 digits)
-function validate_phone($phone) {
-    return preg_match('/^[0-9]{10}$/', $phone);
-}
 ?>
