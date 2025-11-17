@@ -2,13 +2,11 @@
 session_start();
 require_once 'config.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     header('Location: login.php');
     exit;
 }
 
-// Fetch statistics
 $result = $conn->query("SELECT COUNT(*) as total FROM members");
 $total_members = $result->fetch_assoc()['total'];
 
@@ -30,7 +28,6 @@ $today_checkins = $result->fetch_assoc()['total'];
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
 </head>
 <body>
-    <!-- Modern Navigation -->
     <nav class="navbar">
         <div class="container">
             <a href="index.php" class="navbar-brand">
@@ -52,7 +49,6 @@ $today_checkins = $result->fetch_assoc()['total'];
         </div>
     </nav>
 
-    <!-- Hero Section with Gradient Background -->
     <section class="hero-section-new">
         <div class="hero-gradient-bg"></div>
         <div class="container">
@@ -80,7 +76,6 @@ $today_checkins = $result->fetch_assoc()['total'];
                     </a>
                 </div>
 
-                <!-- Live Stats Cards -->
                 <div class="hero-stats-grid">
                     <div class="stat-card">
                         <span class="material-symbols-rounded stat-icon">groups</span>
@@ -108,9 +103,7 @@ $today_checkins = $result->fetch_assoc()['total'];
         </div>
     </section>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <!-- Features Section -->
         <section class="features-section">
             <div class="container">
                 <div class="section-header-new">
@@ -224,7 +217,6 @@ $today_checkins = $result->fetch_assoc()['total'];
             </div>
         </section>
 
-        <!-- Dashboard Overview -->
         <section class="dashboard-overview-section">
             <div class="container">
                 <div class="section-header-new">
@@ -236,7 +228,6 @@ $today_checkins = $result->fetch_assoc()['total'];
                 </div>
 
                 <div class="dashboard-overview-grid">
-                    <!-- Quick Stats Row -->
                     <div class="stats-row">
                         <div class="mini-stat-card">
                             <span class="material-symbols-rounded mini-stat-icon">percent</span>
@@ -261,9 +252,7 @@ $today_checkins = $result->fetch_assoc()['total'];
                         </div>
                     </div>
 
-                    <!-- Main Dashboard Cards -->
                     <div class="dashboard-cards-grid">
-                        <!-- System Status Card -->
                         <div class="modern-dashboard-card">
                             <div class="modern-card-header">
                                 <div class="card-header-left">
@@ -304,7 +293,6 @@ $today_checkins = $result->fetch_assoc()['total'];
                             </div>
                         </div>
 
-                        <!-- Today's Activity Card -->
                         <div class="modern-dashboard-card">
                             <div class="modern-card-header">
                                 <div class="card-header-left">
@@ -336,7 +324,6 @@ $today_checkins = $result->fetch_assoc()['total'];
                             </div>
                         </div>
 
-                        <!-- Recent Activity Timeline -->
                         <div class="modern-dashboard-card card-full-width">
                             <div class="modern-card-header">
                                 <div class="card-header-left">
@@ -346,7 +333,6 @@ $today_checkins = $result->fetch_assoc()['total'];
                             </div>
                             <div class="modern-card-content">
                                 <?php
-                                // Fetch recent attendance records
                                 $recent_activity = $conn->query("
                                     SELECT a.*, m.name 
                                     FROM attendance a 
@@ -401,25 +387,21 @@ $today_checkins = $result->fetch_assoc()['total'];
         </section>
     </main>
 
-    <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
     
     <script src="assets/js/script.js"></script>
     <script>
-        // Mobile navigation toggle
         document.getElementById('navbarToggle').addEventListener('click', function() {
             const menu = document.getElementById('navbarMenu');
             menu.classList.toggle('active');
         });
 
-        // Close mobile menu when clicking on a link
         document.querySelectorAll('.navbar-menu a').forEach(link => {
             link.addEventListener('click', () => {
                 document.getElementById('navbarMenu').classList.remove('active');
             });
         });
 
-        // Animate numbers on load with modern counter animation
         function animateNumbers() {
             const counters = document.querySelectorAll('[data-target]');
             
@@ -442,7 +424,6 @@ $today_checkins = $result->fetch_assoc()['total'];
             });
         }
 
-        // Intersection Observer for scroll animations
         function initScrollAnimations() {
             const observerOptions = {
                 threshold: 0.1,
@@ -462,7 +443,6 @@ $today_checkins = $result->fetch_assoc()['total'];
             });
         }
 
-        // Initialize everything on DOM load
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 animateNumbers();
@@ -470,7 +450,6 @@ $today_checkins = $result->fetch_assoc()['total'];
             }, 300);
         });
 
-        // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();

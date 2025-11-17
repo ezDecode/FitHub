@@ -2,41 +2,32 @@
 session_start();
 require_once 'config.php';
 
-// if user is logged in
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
  header('Location: login.php');
  exit;
 }
 
-// GET DATE RANGE FOR REPORTS
-// If user selected dates, use those. Otherwise use current month.
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 
-// QUERY 1: Count total check-ins in date range
 $query1 = "SELECT COUNT(*) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
 $result1 = $conn->query($query1);
 $total_checkins = $result1->fetch_assoc()['total'];
 
-// QUERY 2: Count how many different days had activity
 $query2 = "SELECT COUNT(DISTINCT date) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
 $result2 = $conn->query($query2);
 $active_days = $result2->fetch_assoc()['total'];
 
-// QUERY 3: Count how many unique members visited
 $query3 = "SELECT COUNT(DISTINCT member_id) as total FROM attendance WHERE date BETWEEN '$start_date' AND '$end_date'";
 $result3 = $conn->query($query3);
 $unique_members = $result3->fetch_assoc()['total'];
 
-// CALCULATE AVERAGE: Total check-ins divided by active days
-// Make sure we don't divide by zero!
 if ($active_days > 0) {
     $avg_daily = round($total_checkins / $active_days, 1);
 } else {
     $avg_daily = 0;
 }
 
-// QUERY 4: Get check-ins for each day (for the chart)
 $query4 = "SELECT date, COUNT(*) as checkins 
           FROM attendance
           WHERE date BETWEEN '$start_date' AND '$end_date' 
@@ -44,13 +35,11 @@ $query4 = "SELECT date, COUNT(*) as checkins
           ORDER BY date";
 $result4 = $conn->query($query4);
 
-// Put daily data into array
 $daily_trends = [];
 while ($one_day = $result4->fetch_assoc()) {
     $daily_trends[] = $one_day;
 }
 
-// QUERY 5: Get top 10 most active members
 $query5 = "SELECT m.name, m.membership_type, COUNT(a.id) as checkins 
           FROM members m 
           JOIN attendance a ON m.id = a.member_id 
@@ -60,7 +49,6 @@ $query5 = "SELECT m.name, m.membership_type, COUNT(a.id) as checkins
           LIMIT 10";
 $result5 = $conn->query($query5);
 
-// Put top members into array
 $top_members = [];
 while ($one_member = $result5->fetch_assoc()) {
     $top_members[] = $one_member;
@@ -81,7 +69,6 @@ while ($one_member = $result5->fetch_assoc()) {
 </head>
 
 <body>
-    <!-- Modern Navigation -->
     <nav class="navbar">
         <div class="container">
             <a href="index.php" class="navbar-brand">
@@ -103,10 +90,8 @@ while ($one_member = $result5->fetch_assoc()) {
         </div>
     </nav>
     
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Reports Header -->
             <div class="reports-header-bar">
                 <div class="reports-header-content">
                     <h2 class="page-section-title">Analytics & Reports</h2>
@@ -118,7 +103,6 @@ while ($one_member = $result5->fetch_assoc()) {
                 </div>
             </div>
 
-            <!-- Filter Reports -->
             <div class="reports-filter-card">
                 <div class="form-header">
                     <div class="form-header-left">
@@ -151,7 +135,6 @@ while ($one_member = $result5->fetch_assoc()) {
                 </form>
             </div>
 
-            <!-- Analytics Overview -->
             <div class="reports-analytics-grid">
                 <div class="reports-analytics-card">
                     <div class="analytics-card-icon-wrapper">
@@ -195,9 +178,7 @@ while ($one_member = $result5->fetch_assoc()) {
                 </div>
             </div>
 
-            <!-- Charts Section -->
             <div class="reports-charts-grid">
-                <!-- Daily Check-in Trends -->
                 <div class="reports-chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
@@ -211,7 +192,6 @@ while ($one_member = $result5->fetch_assoc()) {
                     </div>
                 </div>
 
-                <!-- Top Members -->
                 <div class="reports-chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
@@ -247,7 +227,6 @@ while ($one_member = $result5->fetch_assoc()) {
                 </div>
             </div>
 
-            <!-- Additional Insights -->
             <div class="insights-section">
                 <div class="insight-card">
                     <div class="insight-header">
@@ -279,25 +258,21 @@ while ($one_member = $result5->fetch_assoc()) {
         </div>
     </main>
     
-    <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
     
     <script src="assets/js/script.js"></script>
     <script>
-    // Mobile navigation toggle
     document.getElementById('navbarToggle').addEventListener('click', function() {
         const menu = document.getElementById('navbarMenu');
         menu.classList.toggle('active');
     });
 
-    // Close mobile menu when clicking on a link
     document.querySelectorAll('.navbar-menu a').forEach(link => {
         link.addEventListener('click', () => {
             document.getElementById('navbarMenu').classList.remove('active');
         });
     });
 
-    // Toggle filter form
     function toggleFilterForm() {
         const form = document.getElementById('filterForm');
         const btn = document.querySelector('.filter-toggle-btn .material-symbols-rounded');
@@ -310,7 +285,6 @@ while ($one_member = $result5->fetch_assoc()) {
         }
     }
 
-    // Initialize Chart.js
     const ctx = document.getElementById('dailyTrendsChart').getContext('2d');
     const dailyTrendsData = <?php echo json_encode($daily_trends); ?>;
 

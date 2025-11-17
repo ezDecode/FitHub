@@ -2,33 +2,24 @@
 session_start();
 require_once 'config.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     header('Location: login.php');
     exit;
 }
 
-// Variables to show messages
 $message = '';
 $message_type = '';
 
-// Check if form was submitted
 if ($_POST) {
     
-    // MEMBER CHECK-IN
     if (isset($_POST['check_in'])) {
-        // Step 1: Get member ID from form
         $member_id = $_POST['member_id'];
+        $current_time = date('Y-m-d H:i:s');
+        $today_date = date('Y-m-d');
         
-        // Step 2: Get current time and date
-        $current_time = date('Y-m-d H:i:s');  // Example: 2025-11-15 14:30:00
-        $today_date = date('Y-m-d');          // Example: 2025-11-15
-        
-        // Step 3: Save check-in to database
         $checkin_query = "INSERT INTO attendance (member_id, check_in_time, date) 
                          VALUES ($member_id, '$current_time', '$today_date')";
         
-        // Step 4: Show success or error message
         if ($conn->query($checkin_query)) {
             $message = "Member checked in successfully at " . date('g:i A');
             $message_type = "success";
@@ -38,20 +29,14 @@ if ($_POST) {
         }
     }
     
-    // MEMBER CHECK-OUT
     if (isset($_POST['check_out'])) {
-        // Step 1: Get attendance record ID
         $attendance_id = $_POST['attendance_id'];
-        
-        // Step 2: Get current time for check-out
         $current_time = date('Y-m-d H:i:s');
         
-        // Step 3: Update the record with check-out time
         $checkout_query = "UPDATE attendance 
                           SET check_out_time = '$current_time' 
                           WHERE id = $attendance_id";
         
-        // Step 4: Show success or error message
         if ($conn->query($checkout_query)) {
             $message = "Member checked out successfully at " . date('g:i A');
             $message_type = "success";
@@ -62,12 +47,8 @@ if ($_POST) {
     }
 }
 
-// GET TODAY'S ATTENDANCE RECORDS
-// Step 1: Get today's date
 $today = date('Y-m-d');
 
-// Step 2: Get all attendance for today with member names
-// We JOIN the members table to get member names
 $today_attendance_query = "SELECT a.*, m.name, m.membership_type
                           FROM attendance a 
                           JOIN members m ON a.member_id = m.id 
@@ -76,20 +57,17 @@ $today_attendance_query = "SELECT a.*, m.name, m.membership_type
 
 $attendance_result = $conn->query($today_attendance_query);
 
-// Step 3: Put all records into an array
 $today_attendance = [];
 while ($one_record = $attendance_result->fetch_assoc()) {
     $today_attendance[] = $one_record;
 }
 
-// Fetch all members for dropdown
 $result = $conn->query("SELECT * FROM members WHERE status = 'active' ORDER BY name");
 $members = [];
 while ($row = $result->fetch_assoc()) {
     $members[] = $row;
 }
 
-// Calculate today's summary
 $total_checkins = count($today_attendance);
 $currently_in_gym = count(array_filter($today_attendance, function($attendance) {
     return $attendance['check_out_time'] === null;
@@ -111,7 +89,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
 </head>
 
 <body>
-    <!-- Modern Navigation -->
     <nav class="navbar">
         <div class="container">
             <a href="index.php" class="navbar-brand">
@@ -133,10 +110,8 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Quick Stats Overview -->
             <div class="attendance-overview-bar">
                 <div class="overview-content">
                     <h2 class="page-section-title">Attendance Tracking</h2>
@@ -148,7 +123,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                 </div>
             </div>
 
-            <!-- Alert Messages -->
             <?php if ($message): ?>
             <div class="alert alert-<?php echo $message_type; ?>">
                 <?php echo $message; ?>
@@ -156,7 +130,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
             </div>
             <?php endif; ?>
 
-            <!-- Check-in Form -->
             <div class="checkin-form-card">
                 <div class="form-header">
                     <div class="form-header-left">
@@ -204,7 +177,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                 </form>
             </div>
 
-            <!-- Today's Summary -->
             <div class="attendance-summary-cards">
                 <div class="attendance-summary-card">
                     <div class="summary-card-icon-wrapper">
@@ -238,7 +210,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
                 </div>
             </div>
 
-            <!-- Today's Attendance -->
             <div class="attendance-list-container">
                 <div class="attendance-list-header">
                     <div class="list-header-left">
@@ -343,25 +314,21 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
         </div>
     </main>
 
-    <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
 
     <script src="assets/js/script.js"></script>
     <script>
-    // Mobile navigation toggle
     document.getElementById('navbarToggle').addEventListener('click', function() {
         const menu = document.getElementById('navbarMenu');
         menu.classList.toggle('active');
     });
 
-    // Close mobile menu when clicking on a link
     document.querySelectorAll('.navbar-menu a').forEach(link => {
         link.addEventListener('click', () => {
             document.getElementById('navbarMenu').classList.remove('active');
         });
     });
 
-    // Update time displays every second
     function updateTime() {
         const now = new Date();
         const timeString = now.toLocaleTimeString('en-US', {
@@ -376,24 +343,20 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
             minute: '2-digit'
         });
 
-        // Update form time
         const formTime = document.getElementById('current_time');
         if (formTime) {
             formTime.value = timeString;
         }
 
-        // Update display time
         const displayTime = document.getElementById('liveTimeDisplay');
         if (displayTime) {
             displayTime.textContent = displayString;
         }
     }
 
-    // Update time immediately and then every second
     updateTime();
     setInterval(updateTime, 1000);
 
-    // Update live durations for active sessions
     function updateLiveDurations() {
         const liveDurations = document.querySelectorAll('[data-live-duration="true"]');
         const now = Math.floor(Date.now() / 1000); // Current time in seconds
@@ -409,13 +372,11 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
         });
     }
 
-    // Update durations every 30 seconds
     if (document.querySelectorAll('[data-live-duration="true"]').length > 0) {
         updateLiveDurations();
         setInterval(updateLiveDurations, 30000); // Update every 30 seconds
     }
 
-    // Auto-hide alerts after 5 seconds
     setTimeout(() => {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(alert => {
@@ -424,7 +385,6 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
         });
     }, 5000);
 
-    // Form validation
     const checkinForm = document.querySelector('.checkin-form');
     if (checkinForm) {
         checkinForm.addEventListener('submit', function(e) {

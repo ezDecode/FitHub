@@ -1,12 +1,9 @@
--- Create the database
 CREATE DATABASE IF NOT EXISTS gym_system;
 USE gym_system;
 
--- Drop tables if they exist (for clean setup)
 DROP TABLE IF EXISTS attendance;
 DROP TABLE IF EXISTS members;
 
--- Create members table
 CREATE TABLE members (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -24,7 +21,6 @@ CREATE TABLE members (
     INDEX idx_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Create attendance table
 CREATE TABLE attendance (
     id INT AUTO_INCREMENT PRIMARY KEY,
     member_id INT NOT NULL,
@@ -42,6 +38,4 @@ CREATE TABLE attendance (
     UNIQUE KEY unique_member_date (member_id, date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- Show success message
 SELECT 'Database setup completed successfully!' AS Status;

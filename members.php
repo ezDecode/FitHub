@@ -2,22 +2,17 @@
 session_start();
 require_once 'config.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     header('Location: login.php');
     exit;
 }
 
-// Variables to show messages to user
 $message = '';
 $message_type = '';
 
-// Check if form was submitted (user clicked a button)
 if ($_POST) {
     
-    // ADD NEW MEMBER
     if (isset($_POST['add_member'])) {
-        // Step 1: Get all data from the form
         $name = $_POST['name'];
         $email = $_POST['email'];
         $phone = $_POST['phone'];
@@ -25,20 +20,15 @@ if ($_POST) {
         $membership_type = $_POST['membership_type'];
         $status = $_POST['status'];
         
-        // Step 2: Check if this email is already used by someone else
         $check_email = $conn->query("SELECT id FROM members WHERE email='$email'");
         
-        // Step 3: If email exists, show error
         if ($check_email->num_rows > 0) {
             $message = "A member with this email already exists.";
             $message_type = "danger";
-        } 
-        // Step 4: If email is new, add the member
-        else {
+        } else {
             $add_member_query = "INSERT INTO members (name, email, phone, join_date, membership_type, status) 
                                  VALUES ('$name', '$email', '$phone', '$join_date', '$membership_type', '$status')";
             
-            // Try to add the member
             if ($conn->query($add_member_query)) {
                 $message = "Member added successfully!";
                 $message_type = "success";
@@ -49,9 +39,7 @@ if ($_POST) {
         }
     }
     
-    // UPDATE EXISTING MEMBER
     if (isset($_POST['update_member'])) {
-        // Step 1: Get the member ID and all new data from form
         $member_id = $_POST['member_id'];
         $new_name = $_POST['name'];
         $new_email = $_POST['email'];
@@ -60,16 +48,12 @@ if ($_POST) {
         $new_membership_type = $_POST['membership_type'];
         $new_status = $_POST['status'];
         
-        // Step 2: Check if new email is already used by a DIFFERENT member
         $check_email = $conn->query("SELECT id FROM members WHERE email='$new_email' AND id != $member_id");
         
-        // Step 3: If email is taken by someone else, show error
         if ($check_email->num_rows > 0) {
             $message = "Email already in use by another member.";
             $message_type = "danger";
-        } 
-        // Step 4: If email is OK, update the member
-        else {
+        } else {
             $update_query = "UPDATE members 
                             SET name='$new_name', 
                                 email='$new_email', 
@@ -79,7 +63,6 @@ if ($_POST) {
                                 status='$new_status' 
                             WHERE id=$member_id";
             
-            // Try to update
             if ($conn->query($update_query)) {
                 $message = "Member updated successfully!";
                 $message_type = "success";
@@ -90,19 +73,12 @@ if ($_POST) {
         }
     }
     
-    // DELETE MEMBER
     if (isset($_POST['delete_member'])) {
-        // Step 1: Get the member ID to delete
         $member_id = $_POST['member_id'];
         
-        // Step 2: First delete all attendance records for this member
-        // (We must delete attendance first because it depends on the member)
         $delete_attendance = $conn->query("DELETE FROM attendance WHERE member_id=$member_id");
-        
-        // Step 3: Now delete the member
         $delete_member = $conn->query("DELETE FROM members WHERE id=$member_id");
         
-        // Step 4: Check if deletion worked
         if ($delete_member) {
             $message = "Member deleted successfully!";
             $message_type = "success";
@@ -113,22 +89,15 @@ if ($_POST) {
     }
 }
 
-// CHECK IF WE ARE EDITING A MEMBER
-// If URL has ?edit=5, we are editing member with ID 5
 $edit_member = null;
 if (isset($_GET['edit'])) {
     $member_id = $_GET['edit'];
-    
-    // Get this member's data from database
     $get_member = $conn->query("SELECT * FROM members WHERE id=$member_id");
     $edit_member = $get_member->fetch_assoc();
 }
 
-// GET ALL MEMBERS FROM DATABASE
-// This will show in the members list below
 $all_members_query = $conn->query("SELECT * FROM members ORDER BY name");
 
-// Put all members into an array
 $members = [];
 while ($one_member = $all_members_query->fetch_assoc()) {
     $members[] = $one_member;
@@ -146,7 +115,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
 </head>
 <body>
-    <!-- Modern Navigation -->
     <nav class="navbar">
         <div class="container">
             <a href="index.php" class="navbar-brand">
@@ -168,10 +136,8 @@ while ($one_member = $all_members_query->fetch_assoc()) {
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Quick Actions Bar -->
             <div class="quick-actions-bar">
                 <div class="quick-actions-left">
                     <h2 class="page-section-title">Member Management</h2>
@@ -183,7 +149,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
                 </button>
             </div>
 
-            <!-- Add/Edit Member Form -->
             <div class="form-container member-form-wrapper" id="memberFormContainer" style="display: none;">
                 <div class="form-header">
                     <div class="form-header-left">
@@ -264,7 +229,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
                 </form>
             </div>
 
-            <!-- Members Directory -->
             <div class="members-directory">
                 <div class="directory-header">
                     <div class="directory-title-wrapper">
@@ -349,30 +313,25 @@ while ($one_member = $all_members_query->fetch_assoc()) {
         </div>
     </main>
 
-    <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
     
     <script src="assets/js/script.js"></script>
     <script>
-        // Mobile navigation toggle
         document.getElementById('navbarToggle').addEventListener('click', function() {
             const menu = document.getElementById('navbarMenu');
             menu.classList.toggle('active');
         });
 
-        // Close mobile menu when clicking on a link
         document.querySelectorAll('.navbar-menu a').forEach(link => {
             link.addEventListener('click', () => {
                 document.getElementById('navbarMenu').classList.remove('active');
             });
         });
 
-        // Show toast notifications for PHP messages
         <?php if ($message): ?>
             showToast('<?php echo addslashes($message); ?>', '<?php echo $message_type === 'success' ? 'success' : 'error'; ?>', '<?php echo $message_type === 'success' ? 'Success' : 'Error'; ?>');
         <?php endif; ?>
 
-        // Toggle member form visibility
         function toggleMemberForm() {
             const formContainer = document.getElementById('memberFormContainer');
             const toggleBtn = document.getElementById('toggleFormBtn');
@@ -396,7 +355,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
             }
         }
 
-        // Show form if editing
         <?php if ($edit_member): ?>
             document.getElementById('memberFormContainer').style.display = 'block';
             document.getElementById('toggleFormBtn').innerHTML = '<span class="material-symbols-rounded">close</span><span>Cancel</span>';
@@ -404,7 +362,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
             document.getElementById('toggleFormBtn').classList.add('btn-secondary');
         <?php endif; ?>
 
-        // Form validation
         const memberForm = document.querySelector('.member-form');
         if (memberForm) {
             memberForm.addEventListener('submit', function(e) {
@@ -418,7 +375,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
                     return false;
                 }
                 
-                // Basic email validation
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
                     e.preventDefault();
@@ -426,7 +382,6 @@ while ($one_member = $all_members_query->fetch_assoc()) {
                     return false;
                 }
                 
-                // Basic phone validation
                 const phoneRegex = /^\d{10}$/;
                 if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
                     e.preventDefault();

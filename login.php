@@ -2,13 +2,17 @@
 session_start();
 require_once 'config.php';
 
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
+    header('Location: index.php');
+    exit;
+}
+
 $error = '';
 
 if ($_POST) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     
-    // Simple authentication (in production, use proper password hashing)
     if ($username === 'admin' && $password === 'admin123') {
         $_SESSION['logged_in'] = true;
         $_SESSION['username'] = $username;
@@ -17,12 +21,6 @@ if ($_POST) {
     } else {
         $error = 'Invalid username or password';
     }
-}
-
-// If already logged in, redirect to dashboard
-if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
-    header('Location: index.php');
-    exit;
 }
 ?>
 <!DOCTYPE html>
