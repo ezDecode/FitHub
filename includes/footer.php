@@ -15,10 +15,10 @@
                 <div class="footer-section">
                     <h4 class="footer-title">System</h4>
                     <ul class="footer-list">
-                        <li><a href="index.php">Dashboard</a></li>
-                        <li><a href="members.php">Members</a></li>
-                        <li><a href="attendance.php">Attendance</a></li>
-                        <li><a href="reports.php">Analytics</a></li>
+                        <li><a href="/FitHub/index.php">Dashboard</a></li>
+                        <li><a href="/FitHub/staff/members.php">Members</a></li>
+                        <li><a href="/FitHub/staff/attendance.php">Attendance</a></li>
+                        <li><a href="/FitHub/staff/reports.php">Analytics</a></li>
                     </ul>
                 </div>
                 

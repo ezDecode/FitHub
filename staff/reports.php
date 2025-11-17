@@ -1,11 +1,15 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config.php';
+require_once '../includes/role_check.php';
 
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
- header('Location: login.php');
- exit;
+    header('Location: ../login.php');
+    exit;
 }
+
+// Reports should be available to staff and admin only
+requireRole(['admin', 'staff']);
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
@@ -61,34 +65,15 @@ while ($one_member = $result5->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics - FitHub Gym Management</title>
-    <link rel="stylesheet" href="assets/css/fonts.css?v=3.3">
-    <link rel="stylesheet" href="assets/css/style.css?v=3.3">
+    <link rel="stylesheet" href="../assets/css/fonts.css?v=3.3">
+    <link rel="stylesheet" href="../assets/css/style.css?v=3.3">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="index.php" class="navbar-brand">
-                <span class="material-symbols-rounded brand-icon">fitness_center</span>
-                <span class="brand-text">FitHub</span>
-            </a>
-            <button class="navbar-toggle" id="navbarToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="members.php">Members</a></li>
-                <li><a href="attendance.php">Attendance</a></li>
-                <li><a href="reports.php" class="active">Analytics</a></li>
-                <li><a href="logout.php" class="logout-btn">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+    <?php include '../includes/navigation.php'; ?>
     
     <main class="main-content">
         <div class="container">
@@ -258,9 +243,9 @@ while ($one_member = $result5->fetch_assoc()) {
         </div>
     </main>
     
-    <?php include 'includes/footer.php'; ?>
+    <?php include '../includes/footer.php'; ?>
     
-    <script src="assets/js/script.js"></script>
+    <script src="../assets/js/script.js"></script>
     <script>
     document.getElementById('navbarToggle').addEventListener('click', function() {
         const menu = document.getElementById('navbarMenu');

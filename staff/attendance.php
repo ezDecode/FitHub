@@ -1,11 +1,15 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config.php';
+require_once '../includes/role_check.php';
 
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit;
 }
+
+// Only staff and admin may manage attendance from this page
+requireRole(['admin', 'staff']);
 
 $message = '';
 $message_type = '';
@@ -80,8 +84,8 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance - FitHub Gym Management</title>
-    <link rel="stylesheet" href="assets/css/fonts.css?v=3.3">
-    <link rel="stylesheet" href="assets/css/style.css?v=3.3">
+    <link rel="stylesheet" href="../assets/css/fonts.css?v=3.3">
+    <link rel="stylesheet" href="../assets/css/style.css?v=3.3">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="icon"
@@ -89,26 +93,7 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="index.php" class="navbar-brand">
-                <span class="material-symbols-rounded brand-icon">fitness_center</span>
-                <span class="brand-text">FitHub</span>
-            </a>
-            <button class="navbar-toggle" id="navbarToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="members.php">Members</a></li>
-                <li><a href="attendance.php" class="active">Attendance</a></li>
-                <li><a href="reports.php">Analytics</a></li>
-                <li><a href="logout.php" class="logout-btn">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+    <?php include '../includes/navigation.php'; ?>
 
     <main class="main-content">
         <div class="container">
@@ -314,9 +299,9 @@ $currently_in_gym = count(array_filter($today_attendance, function($attendance) 
         </div>
     </main>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include '../includes/footer.php'; ?>
 
-    <script src="assets/js/script.js"></script>
+    <script src="../assets/js/script.js"></script>
     <script>
     document.getElementById('navbarToggle').addEventListener('click', function() {
         const menu = document.getElementById('navbarMenu');

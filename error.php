@@ -42,7 +42,7 @@ $error_title = $error_messages[$error_code] ?? 'Error';
                 ?>
             </p>
             <div class="error-actions">
-                <a href="index.php" class="btn btn-primary">
+                <a href="/FitHub/index.php" class="btn btn-primary">
                     <span>Go Home</span>
                 </a>
                 <a href="javascript:history.back()" class="btn btn-secondary">

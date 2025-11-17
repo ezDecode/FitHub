@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'includes/role_check.php';
 
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     header('Location: login.php');
@@ -28,31 +29,21 @@ $today_checkins = $result->fetch_assoc()['total'];
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="index.php" class="navbar-brand">
-                <span class="material-symbols-rounded brand-icon">fitness_center</span>
-                <span class="brand-text">FitHub</span>
-            </a>
-            <button class="navbar-toggle" id="navbarToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="index.php" class="active">Dashboard</a></li>
-                <li><a href="members.php">Members</a></li>
-                <li><a href="attendance.php">Attendance</a></li>
-                <li><a href="reports.php">Analytics</a></li>
-                <li><a href="logout.php" class="logout-btn">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+    <?php include 'includes/navigation.php'; ?>
 
     <section class="hero-section-new">
         <div class="hero-gradient-bg"></div>
         <div class="container">
             <div class="hero-content-new">
+                <?php if (isMember()): ?>
+                <h1 class="hero-title-new">
+                    Welcome Back,
+                    <span class="gradient-text"><?php echo htmlspecialchars(explode(' ', getCurrentUserName())[0]); ?></span>
+                </h1>
+                <p class="hero-subtitle-new">
+                    Track your fitness journey and stay motivated with your personalized dashboard.
+                </p>
+                <?php else: ?>
                 <h1 class="hero-title-new">
                     Elevate Your Gym to
                     <span class="gradient-text">New Heights</span>
@@ -60,20 +51,36 @@ $today_checkins = $result->fetch_assoc()['total'];
                 <p class="hero-subtitle-new">
                     Streamline operations, boost member engagement, and grow your fitness business with our all-in-one intelligent management system.
                 </p>
+                <?php endif; ?>
                 
                 <div class="hero-cta">
-                    <a href="members.php" class="cta-primary">
+                    <?php if (isMember()): ?>
+                    <a href="/FitHub/member/profile.php" class="cta-primary">
+                        <span>View Profile</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.16669 10H15.8334M15.8334 10L10 4.16666M15.8334 10L10 15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="/FitHub/member/attendance.php" class="cta-secondary">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 5V15M10 15L5 10M10 15L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>My Attendance</span>
+                    </a>
+                    <?php else: ?>
+                    <a href="/FitHub/staff/members.php" class="cta-primary">
                         <span>Get Started</span>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4.16669 10H15.8334M15.8334 10L10 4.16666M15.8334 10L10 15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    <a href="reports.php" class="cta-secondary">
+                    <a href="/FitHub/staff/reports.php" class="cta-secondary">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10 5V15M10 15L5 10M10 15L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <span>View Analytics</span>
                     </a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="hero-stats-grid">
@@ -141,7 +148,7 @@ $today_checkins = $result->fetch_assoc()['total'];
                                 <span>Activity History</span>
                             </div>
                         </div>
-                        <a href="members.php" class="feature-link">
+                        <a href="/FitHub/staff/members.php" class="feature-link">
                             <span>Explore Members</span>
                             <span class="material-symbols-rounded">arrow_forward</span>
                         </a>
@@ -173,7 +180,7 @@ $today_checkins = $result->fetch_assoc()['total'];
                                 <span>Attendance Reports</span>
                             </div>
                         </div>
-                        <a href="attendance.php" class="feature-link">
+                        <a href="/FitHub/staff/attendance.php" class="feature-link">
                             <span>Track Attendance</span>
                             <span class="material-symbols-rounded">arrow_forward</span>
                         </a>
@@ -205,7 +212,7 @@ $today_checkins = $result->fetch_assoc()['total'];
                                 <span>Custom Reports</span>
                             </div>
                         </div>
-                        <a href="reports.php" class="feature-link">
+                        <a href="/FitHub/staff/reports.php" class="feature-link">
                             <span>View Analytics</span>
                             <span class="material-symbols-rounded">arrow_forward</span>
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -315,7 +322,7 @@ $today_checkins = $result->fetch_assoc()['total'];
                                         </div>
                                     </div>
                                 </div>
-                                <a href="attendance.php" class="card-action-link">
+                                <a href="/FitHub/staff/attendance.php" class="card-action-link">
                                     <span>View Full Attendance</span>
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M3.33331 8H12.6666M12.6666 8L8 3.33334M12.6666 8L8 12.6667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -329,7 +336,7 @@ $today_checkins = $result->fetch_assoc()['total'];
                                 <div class="card-header-left">
                                     <h3 class="card-title-modern">Recent Activity</h3>
                                 </div>
-                                <a href="attendance.php" class="view-all-link">View All</a>
+                                <a href="/FitHub/staff/attendance.php" class="view-all-link">View All</a>
                             </div>
                             <div class="modern-card-content">
                                 <?php

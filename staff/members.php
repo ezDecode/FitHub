@@ -1,11 +1,15 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config.php';
+require_once '../includes/role_check.php';
 
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit;
 }
+
+// Only staff and admin can access member management
+requireRole(['admin', 'staff']);
 
 $message = '';
 $message_type = '';
@@ -74,17 +78,23 @@ if ($_POST) {
     }
     
     if (isset($_POST['delete_member'])) {
-        $member_id = $_POST['member_id'];
-        
-        $delete_attendance = $conn->query("DELETE FROM attendance WHERE member_id=$member_id");
-        $delete_member = $conn->query("DELETE FROM members WHERE id=$member_id");
-        
-        if ($delete_member) {
-            $message = "Member deleted successfully!";
-            $message_type = "success";
-        } else {
-            $message = "Error deleting member.";
+        // Only admins may delete members
+        if (!isAdmin()) {
+            $message = "Unauthorized action. Only administrators can delete members.";
             $message_type = "danger";
+        } else {
+            $member_id = $_POST['member_id'];
+
+            $delete_attendance = $conn->query("DELETE FROM attendance WHERE member_id=$member_id");
+            $delete_member = $conn->query("DELETE FROM members WHERE id=$member_id");
+
+            if ($delete_member) {
+                $message = "Member deleted successfully!";
+                $message_type = "success";
+            } else {
+                $message = "Error deleting member.";
+                $message_type = "danger";
+            }
         }
     }
 }
@@ -109,32 +119,13 @@ while ($one_member = $all_members_query->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Members - FitHub Gym Management</title>
-    <link rel="stylesheet" href="assets/css/fonts.css?v=3.3">
-    <link rel="stylesheet" href="assets/css/style.css?v=3.3">
+    <link rel="stylesheet" href="../assets/css/fonts.css?v=3.3">
+    <link rel="stylesheet" href="../assets/css/style.css?v=3.3">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>🏋️</text></svg>">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="index.php" class="navbar-brand">
-                <span class="material-symbols-rounded brand-icon">fitness_center</span>
-                <span class="brand-text">FitHub</span>
-            </a>
-            <button class="navbar-toggle" id="navbarToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="members.php" class="active">Members</a></li>
-                <li><a href="attendance.php">Attendance</a></li>
-                <li><a href="reports.php">Analytics</a></li>
-                <li><a href="logout.php" class="logout-btn">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+    <?php include '../includes/navigation.php'; ?>
 
     <main class="main-content">
         <div class="container">
@@ -221,7 +212,7 @@ while ($one_member = $all_members_query->fetch_assoc()) {
                             <span><?php echo $edit_member ? ' Update Member' : ' Add Member'; ?></span>
                         </button>
                         <?php if ($edit_member): ?>
-                            <a href="members.php" class="btn btn-secondary">
+                            <a href="/FitHub/staff/members.php" class="btn btn-secondary">
                                 <span>Cancel</span>
                             </a>
                         <?php endif; ?>
@@ -283,17 +274,19 @@ while ($one_member = $all_members_query->fetch_assoc()) {
                                     </div>
                                 </div>
                                 <div class="member-card-actions">
-                                    <a href="?edit=<?php echo $member['id']; ?>" class="btn btn-sm btn-secondary">
-                                        <span class="material-symbols-rounded">edit</span>
-                                        <span>Edit</span>
-                                    </a>
-                                    <form method="POST" style="display: inline;" data-confirm="Are you sure you want to delete this member?" data-member-name="<?php echo htmlspecialchars($member['name']); ?>">
-                                        <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                                        <button type="submit" name="delete_member" class="btn btn-sm btn-danger">
-                                            <span class="material-symbols-rounded">delete</span>
-                                            <span>Delete</span>
-                                        </button>
-                                    </form>
+                                        <a href="?edit=<?php echo $member['id']; ?>" class="btn btn-sm btn-secondary">
+                                            <span class="material-symbols-rounded">edit</span>
+                                            <span>Edit</span>
+                                        </a>
+                                        <?php if (isAdmin()): ?>
+                                        <form method="POST" style="display: inline;" data-confirm="Are you sure you want to delete this member?" data-member-name="<?php echo htmlspecialchars($member['name']); ?>">
+                                            <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
+                                            <button type="submit" name="delete_member" class="btn btn-sm btn-danger">
+                                                <span class="material-symbols-rounded">delete</span>
+                                                <span>Delete</span>
+                                            </button>
+                                        </form>
+                                        <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -313,9 +306,9 @@ while ($one_member = $all_members_query->fetch_assoc()) {
         </div>
     </main>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include '../includes/footer.php'; ?>
     
-    <script src="assets/js/script.js"></script>
+    <script src="../assets/js/script.js"></script>
     <script>
         document.getElementById('navbarToggle').addEventListener('click', function() {
             const menu = document.getElementById('navbarMenu');
@@ -345,7 +338,7 @@ while ($one_member = $all_members_query->fetch_assoc()) {
             } else {
                 // If canceling edit, redirect to clean page
                 <?php if ($edit_member): ?>
-                    window.location.href = 'members.php';
+                    window.location.href = '/FitHub/staff/members.php';
                 <?php else: ?>
                     formContainer.style.display = 'none';
                     toggleBtn.innerHTML = '<span class="material-symbols-rounded">person_add</span><span>Add New Member</span>';
