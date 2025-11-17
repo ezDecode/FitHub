@@ -13,13 +13,43 @@ if ($_POST) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     
-    if ($username === 'admin' && $password === 'admin123') {
-        $_SESSION['logged_in'] = true;
-        $_SESSION['username'] = $username;
-        header('Location: index.php');
-        exit;
+    if (!empty($username) && !empty($password)) {
+        // Query the users table
+        $stmt = $conn->prepare("SELECT id, username, password, full_name, role, status FROM users WHERE username = ? AND status = 'active'");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+            
+            // Verify password using password_verify for bcrypt hashes
+            if (password_verify($password, $user['password'])) {
+                // Update last_login
+                $update_stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                $update_stmt->bind_param("i", $user['id']);
+                $update_stmt->execute();
+                $update_stmt->close();
+                
+                // Set session variables
+                $_SESSION['logged_in'] = true;
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['role'] = $user['role'];
+                
+                header('Location: index.php');
+                exit;
+            } else {
+                $error = 'Invalid username or password';
+            }
+        } else {
+            $error = 'Invalid username or password';
+        }
+        
+        $stmt->close();
     } else {
-        $error = 'Invalid username or password';
+        $error = 'Please enter both username and password';
     }
 }
 ?>
@@ -59,7 +89,7 @@ if ($_POST) {
                         <span class="material-symbols-rounded">person</span> Username
                     </label>
                     <input type="text" id="username" name="username" class="form-control" 
-                           placeholder="Enter your username" required>
+                           placeholder="Enter your username" required autofocus>
                 </div>
                 
                 <div class="form-group">
@@ -75,6 +105,15 @@ if ($_POST) {
                     <span>Sign In</span>
                 </button>
             </form>
+            
+            <div class="login-footer" style="margin-top: 2rem;">
+                <div class="demo-credentials">
+                    <p style="margin: 0 0 0.5rem 0; color: var(--gray-400);">Demo Credentials:</p>
+                    <p style="margin: 0.25rem 0;">Admin: <code>admin</code> / <code>password</code></p>
+                    <p style="margin: 0.25rem 0;">Staff: <code>staff1</code> / <code>password</code></p>
+                    <p style="margin: 0.25rem 0;">Member: <code>member1</code> / <code>password</code></p>
+                </div>
+            </div>
         </div>
     </div>
     
